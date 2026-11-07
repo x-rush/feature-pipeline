@@ -1,0 +1,155 @@
+{
+  "_note": "Gears, dispatch tables, and overrides. Change gears here, never in SKILL.md or the READMEs.",
+  "entry": {
+    "max_triggers": ["数据迁移", "数据删除", "鉴权", "支付", "并发", "跨服务", "migration", "delete data", "auth", "payment", "concurrency", "cross-service"],
+    "high_min_files": 4,
+    "high_max_files": 5,
+    "multi_module_min_files": 4,
+    "low_min_files": 6,
+    "low_requires_revertible": true,
+    "low_requires_single_module": true
+  },
+  "gear_aliases": {
+    "low": ["low", "省钱", "便宜", "最省", "最小成本", "只求能跑", "cheapest", "fastest"],
+    "high": ["high", "主流", "标准", "正常", "默认", "standard", "be careful"],
+    "max": ["max", "高风险", "最稳", "别出错", "事故级", "production-critical"]
+  },
+  "override_policy": {
+    "allow_user_override": true,
+    "warn_when_below_risk": true,
+    "require_risk_ack": true,
+    "allow_downgrade_midflight": false,
+    "downgrade_requires_g0_rerun": true
+  },
+  "pipeline": {
+    "state_file": "features/<slug>/.pipeline.json",
+    "state_template": "templates/pipeline.json",
+    "state_schema": ["slug", "gear", "gear_source", "attrs", "models", "stage", "verdict", "rounds", "risk_ack", "missing_skills", "state_mismatch", "dirty_files"],
+    "authority": "stage and verdict live in the state file; artifacts are evidence; on conflict trust the file and set state_mismatch",
+    "stages": ["G0", "G1", "G2", "G3", "G4", "done"],
+    "review_files": {
+      "1": "review.md",
+      "2": "review-r2.md",
+      "3": "review-r3.md"
+    },
+    "review_semantics": {
+      "review_rounds": "first-pass independent reviews; in max the 2nd round is adversarial-only",
+      "verification_round_after_rework": 1,
+      "verification_round_consumes_review_rounds": false,
+      "rework_cap": 3,
+      "rework_cap_action": "escalate to G1 on the 3rd rework"
+    },
+    "ac_verdicts": ["PASS", "FAIL", "UNVERIFIED"],
+    "empty_verdict_means": "unchecked; UNVERIFIED is never PASS"
+  },
+  "layers": {
+    "superpowers": "process and discipline: how to move (loop, ledger, evidence, finish)",
+    "mattpocock": "criteria and vocabulary: what good means (seams, anti-patterns, two-axis review, deep modules, glossary)",
+    "ponytail": "compression: how to do less",
+    "graphify": "retrieval: where things are"
+  },
+  "tie_break": [
+    "test loop: superpowers test-driven-development; test quality: mattpocock tdd",
+    "refactoring belongs to review, not the red-green loop (mattpocock wins this conflict)",
+    "PASS/FAIL comes from mattpocock code-review (Standards + Spec); ponytail-review may only add minimalism findings and must not change the AC verdict",
+    "debugging: first 3 rounds systematic-debugging; on BLOCKED escalate to diagnosing-bugs",
+    "never dispatch ask-matt or using-superpowers; the current stage wins"
+  ],
+  "attributes": {
+    "ui": "touches pages / components / styles / motion",
+    "no_tests": "target module has ~zero test coverage",
+    "cross_module": "crosses >= 2 modules or changes a public interface",
+    "parallel": ">= 3 independent modules that can land separately",
+    "legacy": "undocumented old code with unclear call graph",
+    "terminology": "mixed synonyms, or money / time / permission boundaries",
+    "spike": "the approach itself is uncertain, not just the implementation",
+    "hard_bug": "perf regression or hard-to-reproduce defect (only observable at G3)",
+    "rework": "set after a G4 FAIL"
+  },
+  "skills": {
+    "low": {
+      "g1": ["brainstorming"],
+      "g2": ["writing-plans"],
+      "g3": ["ponytail", "tdd", "verification-before-completion"],
+      "g4": ["code-review"],
+      "finish": [],
+      "notes": "G1+G2 merged in one pass; tdd supplies criteria only, no full loop; ponytail capped at full"
+    },
+    "high": {
+      "g1": ["brainstorming", "graphify"],
+      "g2": ["writing-plans", "graphify", "codebase-design"],
+      "g3": ["tdd", "test-driven-development", "executing-plans", "ponytail", "systematic-debugging", "verification-before-completion"],
+      "g4": ["code-review", "ponytail-review", "receiving-code-review"],
+      "finish": ["finishing-a-development-branch", "pr"],
+      "notes": "tdd gives seams and criteria, test-driven-development runs the loop; G4 must be a fresh session"
+    },
+    "max": {
+      "g1": ["brainstorming", "graphify"],
+      "g2": ["writing-plans", "graphify", "codebase-design", "grill-with-docs"],
+      "g3": ["tdd", "test-driven-development", "executing-plans", "subagent-driven-development", "ponytail", "systematic-debugging", "using-git-worktrees", "verification-before-completion"],
+      "g4": ["code-review", "ponytail-review", "receiving-code-review"],
+      "finish": ["finishing-a-development-branch", "pr"],
+      "notes": "worktree isolation; G4 two rounds (round 2 adversarial only); diagnosing-bugs reserved for BLOCKED"
+    }
+  },
+  "conditional": {
+    "ui": { "g1": ["ui-ux-pro-max"], "g3": ["ui-styling"], "rule": "AC must state a page-level action" },
+    "no_tests": { "g3": ["test-driven-development"], "rule": "first plan task is 'add tests'" },
+    "cross_module": { "g1": ["graphify"], "g2": ["graphify"], "g3": ["graphify"], "rule": "plan lists callers" },
+    "parallel": { "g3": ["dispatching-parallel-agents"], "rule": "one module per subagent" },
+    "legacy": { "g3": ["graphify", "systematic-debugging"], "rule": "draw the call chain first" },
+    "terminology": { "g1": ["domain-modeling"], "rule": "glossary with definition and banned synonyms" },
+    "spike": { "g2": ["prototype"], "rule": "throwaway prototype, write the answer into plan" },
+    "hard_bug": { "g3": ["diagnosing-bugs"], "rule": "escalate after 3 rounds of systematic-debugging" },
+    "rework": { "g3": ["receiving-code-review"], "rule": "verify each finding, never batch-apply" }
+  },
+  "dispatch_rules": {
+    "attributes_add_only": true,
+    "attributes_set_at_g0": "initial set only; additions allowed at any gate",
+    "gear_adds_safeguards_only": true,
+    "never_drop_baseline": ["test-file-readonly", "verification-before-completion", "code-review"],
+    "no_dispatch": ["ask-matt", "using-superpowers", "to-tickets", "triage", "wayfinder", "implement", "implement-spec"],
+    "escalation_rule": "coding-skill-arbiter may only send tasks that G0 accepts: max_triggers, public interface change, untested target module, >=4 files, or an explicit user request"
+  },
+  "low": {
+    "merge_g1g2": true,
+    "plan_fields": ["files", "signatures", "tests", "seams"],
+    "review_rounds": 1,
+    "review_session": "fresh",
+    "review_materials": ["diff", "spec"],
+    "blocker_threshold": 3
+  },
+  "high": {
+    "merge_g1g2": false,
+    "plan_fields": ["files", "signatures", "tests", "seams", "errors", "reuse"],
+    "review_rounds": 1,
+    "review_session": "fresh",
+    "review_materials": ["diff", "spec", "plan", "blockers"],
+    "blocker_threshold": 3
+  },
+  "max": {
+    "merge_g1g2": false,
+    "plan_fields": ["files", "signatures", "tests", "seams", "errors", "reuse", "dataflow", "concurrency", "rollback"],
+    "review_rounds": 2,
+    "review_session": "fresh",
+    "review_materials": ["diff", "spec", "plan", "blockers", "history", "blast_radius"],
+    "blocker_threshold": 1
+  },
+  "host_config": "config/host.local.json",
+  "host_config_example": "config/host.example.json",
+  "roles": {
+    "design": "strongest reasoning: writes interfaces, seams and failure paths in one pass",
+    "code": "cheapest flat-rate model: translates the plan into diffs, makes no design calls",
+    "review": "a different model, ideally a different family, and never weaker than code: reads diff + spec, hunts counterexamples"
+  },
+  "roles_note": "No model ids are committed here: the three roles are the contract, the ids are per host. At G0 read host_config (default config/host.local.json, git-ignored) or resolve against the host catalog, then write the ids into .pipeline.json.models.",
+  "model_note": "If host_config is absent, resolve design/code/review at G0 from the host's own catalog. If the host offers no second model, set models.review_degraded and follow SKILL.md G4.",
+  "est_note": "Cost is expressed as a tier only (low / medium / high). Absolute figures, if any, stay in the git-ignored host config.",
+  "constants": {
+    "ac_min": 3,
+    "ac_max": 7,
+    "max_red_rounds": 3,
+    "progress_every_turns": 5,
+    "skill_max_lines": 150
+  }
+}

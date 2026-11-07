@@ -1,0 +1,21 @@
+{
+  "slug": "<slug>",
+  "gear": "low | high | max",
+  "gear_source": "auto | user | inherited | downgrade",
+  "attrs": [],
+  "models": {
+    "design": "<resolve at G0 from the host catalog>",
+    "code": "<resolve at G0 from the host catalog>",
+    "review": "<resolve at G0 from the host catalog>",
+    "review_degraded": false
+  },
+  "stage": "G0",
+  "verdict": null,
+  "rounds": {
+    "review": 0
+  },
+  "risk_ack": null,
+  "missing_skills": [],
+  "state_mismatch": false,
+  "dirty_files": []
+}

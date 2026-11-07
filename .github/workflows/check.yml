@@ -1,0 +1,21 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # 1) repo invariants: line budget, templates, gear schema, prose/config agreement, doc links
+      - run: node scripts/check-repo.mjs
+      # 2) the dispatch table still parses (packs and skill names)
+      - run: node scripts/check-skills.mjs --list
+      # 3) nothing internal leaked into the publishable tree.
+      #    CI has no local secret list, so this runs with the example patterns.
+      - run: node scripts/check-public-safe.mjs

@@ -1,0 +1,151 @@
+#!/usr/bin/env node
+// Lint the skill repo itself. This is the third gate next to check-skills
+// (dependencies) and check-public-safe (no internal data).
+//
+//   node scripts/check-repo.mjs
+//   node scripts/check-repo.mjs --quiet
+//
+// Checks: line budget, required templates, templates referenced by SKILL.md,
+// state schema vs template, prose numbers vs gears constants, required keys,
+// and relative doc links. Exit 1 on any error.
+
+import { readFileSync, existsSync } from 'node:fs';
+import { dirname, join, resolve, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = dirname(fileURLToPath(import.meta.url));
+const root = resolve(here, '..');
+const quiet = process.argv.includes('--quiet');
+
+const errors = [];
+const notes = [];
+const fail = (m) => errors.push(m);
+const note = (m) => notes.push(m);
+
+const skillPath = join(root, 'feature-pipeline', 'SKILL.md');
+const gearsPath = join(root, 'feature-pipeline', 'gears.json');
+const templatesDir = join(root, 'feature-pipeline', 'templates');
+
+const gears = JSON.parse(readFileSync(gearsPath, 'utf8'));
+const skill = readFileSync(skillPath, 'utf8');
+const skillLines = skill.replace(/\n$/, '').split('\n').length;
+
+// 1. line budget
+const maxLines = gears.constants?.skill_max_lines ?? 150;
+if (skillLines > maxLines) fail(`SKILL.md is ${skillLines} lines, over the ${maxLines}-line budget`);
+
+// 2. required templates
+const required = ['spec.md', 'plan-low.md', 'plan-high.md', 'plan-max.md', 'evidence.md', 'review.md', 'blocker.md', 'retro.md', 'pipeline.json', 'backlog.md'];
+for (const t of required) {
+  if (!existsSync(join(templatesDir, t))) fail(`missing template: templates/${t}`);
+}
+
+// 3. every template SKILL.md points at must exist
+//    (templates/plan-<gear>.md is a pattern, so allow the angle-bracket tail)
+const refs = [...skill.matchAll(/templates\/([A-Za-z0-9._-]+)(<[^>]*>)?(?:\.(?:md|json))?/g)]
+  .filter((m) => !m[2])          // skip the <gear> pattern form
+  .map((m) => `${m[1]}${m[3] ?? ''}`)
+  .filter((r) => r.endsWith('.md') || r.endsWith('.json'));
+for (const r of new Set(refs)) {
+  if (!existsSync(join(templatesDir, r))) fail(`SKILL.md references templates/${r}, which does not exist`);
+}
+
+// 4. state schema listed in gears must match the state template
+const tplPath = join(templatesDir, 'pipeline.json');
+if (existsSync(tplPath)) {
+  const tpl = JSON.parse(readFileSync(tplPath, 'utf8'));
+  for (const key of gears.pipeline?.state_schema ?? []) {
+    if (!(key in tpl)) fail(`pipeline.json template lacks state field "${key}"`);
+  }
+  for (const key of Object.keys(tpl)) {
+    if (!key.startsWith('_') && !(gears.pipeline?.state_schema ?? []).includes(key)) {
+      fail(`pipeline.json template has "${key}", absent from gears.pipeline.state_schema`);
+    }
+  }
+}
+
+// 5. numbers restated in prose must match gears constants
+const acMin = gears.constants?.ac_min;
+const acMax = gears.constants?.ac_max;
+const acLine = skill.match(/(\d+)-(\d+) ACs/);
+if (acLine) {
+  if (Number(acLine[1]) !== acMin || Number(acLine[2]) !== acMax) {
+    fail(`SKILL.md says ${acLine[1]}-${acLine[2]} ACs but gears constants say ${acMin}-${acMax}`);
+  }
+} else note('SKILL.md no longer states the AC range in prose');
+
+const progressLine = skill.match(/every (\d+) turns/);
+if (progressLine && Number(progressLine[1]) !== gears.constants?.progress_every_turns) {
+  fail(`SKILL.md says every ${progressLine[1]} turns, gears says ${gears.constants?.progress_every_turns}`);
+}
+
+const budgetLine = skill.match(/<= (\d+) lines/);
+if (budgetLine && Number(budgetLine[1]) !== maxLines) {
+  fail(`SKILL.md says <= ${budgetLine[1]} lines, gears says ${maxLines}`);
+}
+
+const redLine = skill.match(/\((\d+) red rounds; (\d+) in max\)/);
+if (redLine) {
+  const soft = Number(redLine[1]);
+  const hard = Number(redLine[2]);
+  for (const gear of ['low', 'high']) {
+    if (gears[gear]?.blocker_threshold !== soft) fail(`SKILL.md says ${soft} red rounds but ${gear}.blocker_threshold is ${gears[gear]?.blocker_threshold}`);
+  }
+  if (gears.max?.blocker_threshold !== hard) fail(`SKILL.md says ${hard} red rounds in max but max.blocker_threshold is ${gears.max?.blocker_threshold}`);
+} else note('SKILL.md no longer states the blocked threshold in prose');
+
+// 6. keys other scripts rely on
+const requiredKeys = ['entry', 'gear_aliases', 'override_policy', 'pipeline', 'roles', 'attributes', 'skills', 'conditional', 'dispatch_rules', 'constants', 'host_config'];
+for (const k of requiredKeys) {
+  if (!(k in gears)) fail(`gears.json lacks required key "${k}"`);
+}
+if (!gears.roles?.design || !gears.roles?.code || !gears.roles?.review) {
+  fail('gears.roles must define design / code / review');
+}
+
+// 7. relative markdown links resolve
+const mdFiles = [
+  join(root, 'README.md'),
+  join(root, 'feature-pipeline', 'README.md'),
+  join(root, 'coding-skill-arbiter', 'SKILL.md'),
+  join(root, 'coding-skill-arbiter', 'tables.md'),
+  join(root, 'docs', 'HOSTS.md'),
+  join(root, 'docs', 'RELEASING.md'),
+].filter(existsSync);
+
+const RUNTIME = /\b(spec|plan|evidence|review|progress|backlog|retro)(-r\d+)?\.md$|\.pipeline\.json$/;
+// Paths that legitimately never live in this repo: agent skill dirs (~ / .cursor …),
+// git-ignored local config, and shell/env placeholders.
+const notRepoPath = (t) =>
+  t.startsWith('~') || t.startsWith('$') || t.startsWith('.') ||
+  t.includes('.local.json') || t.includes('<') || t.includes('*');
+
+for (const f of mdFiles) {
+  const text = readFileSync(f, 'utf8');
+  for (const m of text.matchAll(/\]\(([^)]+)\)/g)) {
+    const target = m[1].trim();
+    if (/^https?:/.test(target) || target.startsWith('#') || target.includes('<')) continue;
+    const clean = target.split('#')[0];
+    const abs = resolve(dirname(f), clean);
+    if (!existsSync(abs)) fail(`${relative(root, f)} links to missing path: ${clean}`);
+  }
+  for (const m of text.matchAll(/`([^`\s]+\.(?:md|json|mjs))`/g)) {
+    const token = m[1];
+    if (notRepoPath(token)) continue;
+    if (RUNTIME.test(token)) continue; // created inside features/<slug>/ at runtime
+    const abs = resolve(dirname(f), token);
+    const viaRoot = resolve(root, token);
+    if (!existsSync(abs) && !existsSync(viaRoot)) fail(`${relative(root, f)} mentions missing file: ${token}`);
+  }
+}
+
+// report
+if (!quiet) {
+  for (const n of notes) console.log(`note: ${n}`);
+}
+if (errors.length) {
+  console.log(`\nFAIL: ${errors.length} issue(s)`);
+  for (const e of errors) console.log(`  ✗ ${e}`);
+  process.exit(1);
+}
+console.log(`ok: SKILL.md ${skillLines}/${maxLines} lines · ${required.length} templates · schema, constants and links consistent`);

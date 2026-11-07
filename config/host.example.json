@@ -1,0 +1,43 @@
+{
+  "_note": "Shape reference. Copy to config/host.local.json (git-ignored) and fill in ids from YOUR host catalog. `active` picks the entry G0 reads. This repo commits no model ids on purpose.",
+  "active": "<host-you-are-running>",
+  "hosts": {
+    "<session-switch-host>": {
+      "_note": "A host that can only switch model per session (most IDE/CLI tools).",
+      "models": {
+        "design": "<strong reasoning model>",
+        "code": "<cheap model whose price does not jump on long context>",
+        "review": "<different model, ideally another family, never weaker than code>"
+      },
+      "invocation": {
+        "design": "<command to start the design session>",
+        "code": "<command to start the coding session>",
+        "review": "<command to start a FRESH review session>"
+      }
+    },
+    "<role-binding-host>": {
+      "_note": "A host that can bind a model per profile/agent/subagent (Codex, Claude Code, opencode).",
+      "models": {
+        "design": "<design model>",
+        "code": "<code model>",
+        "review": "<review model>"
+      },
+      "profiles": {
+        "design": { "model": "<design model>", "model_reasoning_effort": "high" },
+        "code": { "model": "<code model>", "model_reasoning_effort": "medium" },
+        "review": { "model": "<review model>", "model_reasoning_effort": "high" }
+      },
+      "invocation": {
+        "design": "<host-specific: e.g. codex --profile design>",
+        "code": "<host-specific: e.g. codex --profile code>",
+        "review": "<host-specific: e.g. codex --profile review>"
+      }
+    }
+  },
+  "review_degraded": false,
+  "rules": [
+    "At G0 write the resolved ids into .pipeline.json.models — the state file, not this template, is what a later session reads.",
+    "If review resolves to the same model as code, set review_degraded: true and say so; never claim a cross-model review you did not run.",
+    "If the host cannot bind a model per stage, the design->code->review handoffs stay manual session switches; that is a host limitation, not a pipeline failure."
+  ]
+}
