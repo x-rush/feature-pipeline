@@ -156,7 +156,7 @@ cp -R /tmp/sp/skills/* ~/.easycode-user/skills/
 
 **换模型**：Easy Code 的 mod / skill 扩展面**没有模型切换 API**（本仓库早期版本记录的已知限制），所以三档对应的模型是**在宿主 UI 里手动切**，G4 必须新开会话。
 
-`config/host.local.json` 里可以给它的每个档位写死具体型号与"怎么切"，G0 会把 `invocation` 打印出来。下面这份是 Easy Code **公开的产品数据**，可以直接照抄：
+这份配置已经写进 `config/host.example.json`（开箱可用，不需要自己填）。G0 会把 `invocation` 打印出来，你照着切就行。下面是 Easy Code **公开的产品数据**：
 
 | 角色 | low | high | max | 说明 |
 |---|---|---|---|---|

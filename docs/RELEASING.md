@@ -34,10 +34,12 @@ config/
 - **工作区 clean**：`node scripts/check-public-safe.mjs` 通过（当前只剩密钥一类规则）。
 - **型号与费率已公开**：`docs/HOSTS.md` §5 写的是 Easy Code 公开的型号映射与档位成本，不需要再遮。
 
-新克隆的人只需两步：
+新克隆的人**通常什么都不用填**：`config/host.example.json` 就是开箱可用的 Easy Code + Codex 配置（公开数据）。只在你的宿主或型号目录不同时才需要覆盖：
 
-1. `cp config/host.example.json config/host.local.json`，填**你当前宿主**的型号与切换方式；只有一个模型就设 `review_degraded: true`。
-2.（可选）`cp config/forbidden.example.json config/forbidden.local.json`，把你自己的内部词表加进 `patterns`——没有就别建，默认的密钥规则已经在 example 里。
+1.（可选）`cp config/host.example.json config/host.local.json`，改 `active` 与 `models` 成你当前宿主的真实取值；只有一个模型就设 `review_degraded: true`。
+2.（可选）`cp config/forbidden.example.json config/forbidden.local.json`，把你自己的内部词表加进 `patterns`——没有就别建，密钥规则已经在 example 里生效。
+
+然后三道闸门：`node scripts/check-repo.mjs`、`node scripts/check-skills.mjs`、`node scripts/check-public-safe.mjs`。
 
 然后三道闸门：`node scripts/check-repo.mjs`、`node scripts/check-skills.mjs`、`node scripts/check-public-safe.mjs`。
 

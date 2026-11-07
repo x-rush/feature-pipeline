@@ -1,36 +1,76 @@
 {
-  "_note": "Shape reference. Copy to config/host.local.json (git-ignored) and fill in ids from YOUR host catalog. `active` picks the entry G0 reads. This repo commits no model ids on purpose.",
-  "active": "<host-you-are-running>",
+  "_note": "Ready-to-use defaults. The ids below are Easy Code's public catalog, and the same four OpenAI models back every other host here. Copy this to config/host.local.json (git-ignored) when your machine differs — e.g. a different catalog or extra profiles. `active` picks the entry G0 reads.",
+  "active": "easycode",
   "hosts": {
-    "<session-switch-host>": {
-      "_note": "A host that can only switch model per session (most IDE/CLI tools).",
+    "easycode": {
+      "_note": "Switch models in the host UI; there is no switching API, so a stage change is a manual switch or a new session.",
       "models": {
-        "design": "<strong reasoning model>",
-        "code": "<cheap model whose price does not jump on long context>",
-        "review": "<different model, ideally another family, never weaker than code>"
+        "design": { "low": "gpt-6.1-terra", "high": "gpt-6.1-sol", "max": "gpt-6-astra" },
+        "code": "gpt-6-luna",
+        "review": { "low": "gpt-6.1-sol", "high": "gpt-6-astra", "max": "gpt-6-astra" }
       },
       "invocation": {
-        "design": "<command to start the design session>",
-        "code": "<command to start the coding session>",
-        "review": "<command to start a FRESH review session>"
+        "design": "在本宿主 UI 里切到 models.design[gear]",
+        "code": "切到 models.code",
+        "review": "新开会话 + 切到 models.review[gear]"
+      },
+      "estimate": { "_note": "relative comparison only, not a budget", "low": 26.8, "high": 47.2, "max": 82.1 }
+    },
+    "codex": {
+      "_note": "One config layer per role, selected with --profile. See docs/HOSTS.md for the [agents] table.",
+      "catalog": ["gpt-6-astra", "gpt-6.1-sol", "gpt-6.1-terra", "gpt-6-luna"],
+      "models": {
+        "design": "gpt-6-astra",
+        "code": "gpt-6-luna",
+        "review": "gpt-6.1-sol"
+      },
+      "code_alternatives": ["gpt-6.1-terra"],
+      "invocation": {
+        "design": "codex --profile design",
+        "code": "codex --profile code",
+        "review": "codex --profile review"
+      },
+      "profiles_dir": "~/.codex",
+      "profile_files": {
+        "design": "design.config.toml",
+        "code": "code.config.toml",
+        "review": "review.config.toml"
+      },
+      "review_model": "gpt-6.1-sol",
+      "agents": {
+        "coder": { "config_file": "~/.codex/agents/coder.toml", "model": "gpt-6-luna" }
       }
     },
-    "<role-binding-host>": {
-      "_note": "A host that can bind a model per profile/agent/subagent (Codex, Claude Code, opencode).",
-      "models": {
-        "design": "<design model>",
-        "code": "<code model>",
-        "review": "<review model>"
-      },
-      "profiles": {
-        "design": { "model": "<design model>", "model_reasoning_effort": "high" },
-        "code": { "model": "<code model>", "model_reasoning_effort": "medium" },
-        "review": { "model": "<review model>", "model_reasoning_effort": "high" }
-      },
+    "claude-code": {
+      "_note": "Skill dir is ~/.claude/skills. Fill in the aliases or full ids your plan exposes.",
+      "models": { "design": "<design-model>", "code": "<cheap-model>", "review": "<review-model>" },
       "invocation": {
-        "design": "<host-specific: e.g. codex --profile design>",
-        "code": "<host-specific: e.g. codex --profile code>",
-        "review": "<host-specific: e.g. codex --profile review>"
+        "design": "claude --model <design-model>",
+        "code": "claude --model <cheap-model>",
+        "review": "新会话：claude --model <review-model>"
+      },
+      "subagent_example": {
+        "file": ".claude/agents/reviewer.md",
+        "frontmatter": { "description": "只读 diff 与 spec，逐条 AC 找反例", "model": "<review-model>" }
+      }
+    },
+    "opencode": {
+      "_note": "Reads .opencode/skills plus compat .agents/skills. Roles map onto built-ins plan/build + a reviewer subagent.",
+      "models": { "design": "<provider>/<design-model>#high", "code": "<provider>/<cheap-model>", "review": "<provider>/<review-model>#high" },
+      "invocation": {
+        "design": "opencode 里用 plan agent（配 design 模型）",
+        "code": "opencode 里用 build agent（配 cheap 模型）",
+        "review": "起 reviewer 子代理（只读权限）"
+      },
+      "agent_config": "~/.config/opencode/opencode.json → agents.reviewer.model"
+    },
+    "cursor": {
+      "_note": "Reads .agents/skills natively. Model can change mid-conversation; G4 opens a new chat.",
+      "models": { "design": "<design-model>", "code": "<cheap-model>", "review": "<review-model>" },
+      "invocation": {
+        "design": "模型选择器选 design 模型",
+        "code": "切到 cheap 模型",
+        "review": "新开对话 + 选 review 模型"
       }
     }
   },
