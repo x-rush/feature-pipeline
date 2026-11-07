@@ -1,36 +1,21 @@
 {
-  "_note": "Patterns that must never appear in a publishable tree. Copy this to config/forbidden.local.json and put your real internal names there; that file is git-ignored. The example stays publishable: it holds only placeholders plus generic secret patterns that must never be committed by anyone.",
+  "_note": "Copy to config/forbidden.local.json and add the terms you must never publish. Public data (model ids, published rate cards) does not belong here; secrets, customer names and unpublished internals do. This example stays publishable and its secrets rule is active in CI.",
   "allow": [
     {
       "path": "docs/RELEASING.md",
-      "why": "meta-doc: it names the categories publishing must not contain, so it necessarily mentions them"
+      "why": "meta-doc: it describes the categories publishing must not contain"
     }
   ],
   "patterns": [
     {
       "name": "secrets",
       "regex": "-----BEGIN (RSA |EC |OPENSSH |PGP )?PRIVATE KEY|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}|xox[baprs]-[0-9A-Za-z-]{10,}",
-      "why": "private keys and API tokens must never be committed; this one is active in the example on purpose"
+      "why": "private keys and API tokens must never be committed; this rule is active on purpose so CI scans for real"
     },
     {
-      "name": "internal-host-name",
-      "regex": "<your-internal-host-name>",
-      "why": "any internal tool name goes in forbidden.local.json, never in tracked docs"
-    },
-    {
-      "name": "billing-mechanism",
-      "regex": "<your-billing-mechanism-term>",
-      "why": "pricing mechanics are commercially sensitive; keep the real term in forbidden.local.json"
-    },
-    {
-      "name": "credit-estimates",
-      "regex": "<your-cost-metric-name>",
-      "why": "internal cost model; use relative tiers instead"
-    },
-    {
-      "name": "internal-model-codenames",
-      "regex": "<your-model-ids>",
-      "why": "model ids you do not want committed; use roles instead"
+      "name": "your-own-terms",
+      "regex": "<customer-or-unpublished-term>",
+      "why": "placeholder: put customer names or unpublished internals in forbidden.local.json, never here"
     }
   ]
 }

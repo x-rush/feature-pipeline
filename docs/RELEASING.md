@@ -1,18 +1,19 @@
 # 迭代与发布管理
 
-**先说结论**：你这套东西需要"藏"的只有**宿主型号**和**成本数字**，加起来十来行——不值得为它维护两个仓库。推荐**方案 A：单仓库、公开可发、机密放本地未跟踪配置**。真出现路线图/客户/试运行数据这类内容，再升级到方案 B。
+**先说结论**：真正非公开的只有**密钥/令牌、客户名、未发布内容**这类东西。型号 id 与 Easy Code 的费率是公开数据，可以直接写进仓库——所以不需要为"藏"维护两个仓库，单仓库 + 本地配置就够。真出现路线图/客户/试运行数据，再升级到方案 B。
 
 ---
 
-## 0. 先决定：机密放在哪
+## 0. 先决定：什么进仓库、什么留本地
 
-| 你实际要藏的东西 | 选哪个方案 |
+| 内容 | 放哪 |
 |---|---|
-| 只有宿主型号、成本数字、内部工具名 | **A：单仓库 + 本地配置**（推荐） |
-| 还有路线图、客户信息、内部试运行数据 | **B：私有源 + 公开镜像** |
-| 暂时完全不对外 | **C：只做内部迭代**，A 的整洁度照样值得做 |
+| 闸门、判据、模板、状态机 | 仓库 |
+| 型号 id、Easy Code 费率与档位成本 | 仓库（公开数据，见 `HOSTS.md` §5） |
+| 密钥、令牌、客户名、未发布路线图 | 本地 `config/*.local.json`（git-ignored） |
+| 当前宿主、机器相关路径 | 本地 `config/host.local.json` |
 
-判断标准只有一条：**机密是否只影响"怎么跑"，而不影响"规则本身"**。影响"怎么跑"的东西（型号、价格、目录）本来就是每台机器不同的，天生属于本地配置；影响"规则"的东西（闸门、判据、模板）才可以进仓库。
+判断标准只有一条：**这条信息是否本来就对外可见**。对外可见的进仓库，只有你自己知道的留本地。
 
 ---
 
@@ -27,28 +28,20 @@ config/
   forbidden.local.json     # 未跟踪：真实的内部名称正则
 ```
 
-### 迁移状态
+### 当前状态
 
-**工作区已完成迁移**：型号与金额已从 `../feature-pipeline/gears.json`、README、决定卡里清走，只在未跟踪的 `config/*.local.json` 里留存；`node scripts/check-public-safe.mjs` 在工作区是 **clean**。
+- **仓库历史已重建**：2026-11-07 删库后以**单提交**重新初始化，旧提交不在任何分支上。
+- **工作区 clean**：`node scripts/check-public-safe.mjs` 通过（当前只剩密钥一类规则）。
+- **型号与费率已公开**：`docs/HOSTS.md` §5 写的是 Easy Code 公开的型号映射与档位成本，不需要再遮。
 
-**但历史还没清**。最初的提交里仍有成本数字与计费机制名。用 `git log -S` 搜你写在 `forbidden` 清单里的那些词，就能确认：
+新克隆的人只需两步：
 
-```bash
-# 把 <词> 换成你 forbidden.local.json 里 patterns 的 name/regex 关键字
-git log --all --oneline -S'<词>'
-```
-
-1. **公开仓库用全新初始提交**（推荐）：私有仓库保留历史做归档，公开仓库 `git checkout --orphan` 后首次提交即可；或干脆新建一个仓库。
-2. **原地重写历史**：`git filter-repo --replace-text <rules>`，改完必须重跑守卫 + 让所有克隆重新拉取。
-
-**新克隆的人只需两步**：
-
-1. `cp config/forbidden.example.json config/forbidden.local.json`，把你认识的内部型号 id、内部工具名填进 `patterns`（这样守卫才抓得住你自己环境里的东西）。
-2. `cp config/host.example.json config/host.local.json`，照能力要求填你宿主的真实型号；`review_degraded: true` 如果只有一个模型。
+1. `cp config/host.example.json config/host.local.json`，填**你当前宿主**的型号与切换方式；只有一个模型就设 `review_degraded: true`。
+2.（可选）`cp config/forbidden.example.json config/forbidden.local.json`，把你自己的内部词表加进 `patterns`——没有就别建，默认的密钥规则已经在 example 里。
 
 然后三道闸门：`node scripts/check-repo.mjs`、`node scripts/check-skills.mjs`、`node scripts/check-public-safe.mjs`。
 
-> 如果你是从"迁移前"的版本升级上来的：那时型号与金额写在各处的档位参数里，需要把它们挪进 `config/host.local.json` 再删掉。现在这两处已经没有了，别再往仓库里加。
+> 以后若真需要清历史（例如误提交了密钥）：新建仓库用 `git checkout --orphan` 首提，或 `git filter-repo --replace-text`。改完必须重跑守卫，并让所有克隆重新拉取。
 
 ### 日常迭代怎么走
 
@@ -85,7 +78,7 @@ git log --all --oneline -S'<词>'
 ### 导出怎么做
 
 1. 导出到临时目录（只含需要发布的路径，天然排除 `config/`、内部草稿、内部分支产物）；
-2. 按 `config/forbidden.local.json` 做替换：型号 → `roles` 占位、`credits` → 档位；
+2. 按 `config/forbidden.local.json` 做替换：密钥/令牌 → 环境变量占位、客户名 → 代号；
 3. `node scripts/check-public-safe.mjs --dist <导出目录>` 必须 clean；
 4. 把导出目录同步进公开仓库的克隆，提交并打 tag。
 
@@ -110,7 +103,7 @@ git log --all --oneline -S'<词>'
 | SKILL.md 预算 | ≤150 行；加一句就得砍一句，别偷偷超 |
 | 版本号 | v0.x 起步；改 `.pipeline.json` 字段或状态机语义算破坏性变更，v1 前不承诺兼容 |
 | CHANGELOG | 每次发布写"修了什么 + 为什么"，素材直接取 `retro.md` |
-| 公开红线 | 不出现 credits、内部型号、内部工具名、客户名 |
+| 公开红线 | 不出现密钥/令牌、客户名、未发布的内部信息 |
 | 依赖安全 | 只从原始 owner 安装，先 `-l` 看清单；不把第三方正文抄进本仓库 |
 
 ## 每次改动前的自查清单

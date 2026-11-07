@@ -156,22 +156,35 @@ cp -R /tmp/sp/skills/* ~/.easycode-user/skills/
 
 **换模型**：Easy Code 的 mod / skill 扩展面**没有模型切换 API**（本仓库早期版本记录的已知限制），所以三档对应的模型是**在宿主 UI 里手动切**，G4 必须新开会话。
 
-`config/host.local.json` 里可以给它的每个档位写死具体型号与"怎么切"，G0 会把 `invocation` 打印出来：
+`config/host.local.json` 里可以给它的每个档位写死具体型号与"怎么切"，G0 会把 `invocation` 打印出来。下面这份是 Easy Code **公开的产品数据**，可以直接照抄：
+
+| 角色 | low | high | max | 说明 |
+|---|---|---|---|---|
+| design | `gpt-6.1-terra` | `gpt-6.1-sol` | `gpt-6-astra` | 官方定位：astra 最强 → sol 接近 astra 但更便宜 → terra 快而省 → luna 最省 |
+| code | `gpt-6-luna` | 同左 | 同左 | 编码不用换档，最省的那个够用 |
+| review | `gpt-6.1-sol` | `gpt-6-astra` | `gpt-6-astra` | 与 code 不同族级，且能力高于 code |
+
+官方公开定价（美元 / 百万 token）：`gpt-6-astra` 最强档位价、`gpt-6.1-sol` \$2 / \$10、`gpt-6.1-terra` \$1 / \$5、`gpt-6-luna` \$0.1 / \$0.5。
+
+单次功能的相对成本（Easy Code 公开数据，仅作档位间的横向比较）：
 
 ```json
 "easycode": {
   "models": {
-    "design": { "low": "<cheap-strong>", "high": "<mid>", "max": "<strongest>" },
-    "code": "<cheapest>",
-    "review": { "low": "<mid>", "high": "<strongest>", "max": "<strongest>" }
+    "design": { "low": "gpt-6.1-terra", "high": "gpt-6.1-sol", "max": "gpt-6-astra" },
+    "code": "gpt-6-luna",
+    "review": { "low": "gpt-6.1-sol", "high": "gpt-6-astra", "max": "gpt-6-astra" }
   },
   "invocation": {
-    "design": "在 Easy Code 里切到 models.design[gear]",
+    "design": "在本宿主 UI 里切到 models.design[gear]",
     "code": "切到 models.code",
     "review": "新开会话 + 切到 models.review[gear]"
-  }
+  },
+  "estimate": { "low": 26.8, "high": 47.2, "max": 82.1 }
 }
 ```
+
+> 换宿主时只改 `models` 与 `invocation`；`estimate` 留空或删掉都行，它不是流程的一部分，只是 G0 打印给人看的对比。
 
 > 📦 **证据等级**：目录约定来自产品自身与本仓库记录；**本机没有这个目录，所以落点未实测**。你要验的话，装完问一句"你现在有哪些 skills"即可。
 
