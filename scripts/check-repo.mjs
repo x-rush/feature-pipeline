@@ -10,6 +10,7 @@
 // and relative doc links. Exit 1 on any error.
 
 import { readFileSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { dirname, join, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -101,6 +102,49 @@ for (const k of requiredKeys) {
 }
 if (!gears.roles?.design || !gears.roles?.code || !gears.roles?.review) {
   fail('gears.roles must define design / code / review');
+}
+
+// 6b. host config must resolve on a fresh clone: the last entry is the tracked
+//     default, every other entry is an optional (git-ignored) override.
+const entries = Array.isArray(gears.host_config) ? gears.host_config : [gears.host_config];
+if (!Array.isArray(gears.host_config) || entries.length !== 2) {
+  fail('gears.host_config should be [optional local override, tracked default]');
+}
+const trackedDefault = entries[entries.length - 1];
+const override = entries[0];
+if (!override.includes('.local.')) note(`host_config override ${override} is not a *.local.json path`);
+
+const defaultValue = resolve(root, trackedDefault);
+if (!existsSync(defaultValue)) {
+  fail(`host_config default ${trackedDefault} is missing — a fresh clone would have no config`);
+} else {
+  const cfg = JSON.parse(readFileSync(defaultValue, 'utf8'));
+  const active = cfg.active;
+  if (!active) fail(`${trackedDefault} has no "active" host`);
+  else {
+    const host = cfg.hosts?.[active];
+    if (!host) fail(`${trackedDefault} active host "${active}" is not in hosts`);
+    else {
+      for (const role of ['design', 'code', 'review']) {
+        if (!host.models?.[role]) fail(`${trackedDefault} host "${active}" lacks models.${role}`);
+      }
+      if (!host.invocation || !Object.keys(host.invocation).length) {
+        fail(`${trackedDefault} host "${active}" lacks invocation`);
+      }
+    }
+    for (const key of entries) {
+      const p = resolve(root, key);
+      if (!existsSync(p)) continue;
+      const cfg2 = JSON.parse(readFileSync(p, 'utf8'));
+      if (cfg2.active && !cfg2.hosts?.[cfg2.active]) fail(`${key} active host "${cfg2.active}" is not in hosts`);
+    }
+  }
+  // the default must be committed, otherwise clones do not get it
+  try {
+    execFileSync('git', ['ls-files', '--error-unmatch', trackedDefault], { cwd: root, stdio: 'ignore' });
+  } catch {
+    fail(`${trackedDefault} exists but is not tracked by git — a clone would not get it`);
+  }
 }
 
 // 7. relative markdown links resolve

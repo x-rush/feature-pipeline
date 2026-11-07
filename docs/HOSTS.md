@@ -12,7 +12,7 @@
 | **opencode** | `.opencode/skills`、`~/.config/opencode/skills`，**兼容** `.agents/skills`、`.claude/skills` 及其 user 级 | `.agents/skills/` ✅ | 📄 `agents.<id>.model`（`provider/model#variant`） |
 | **Cursor** | `.cursor/skills`、`.agents/skills`、`~/.cursor/skills`、`~/.agents/skills`，**兼容** `.claude`、`.codex` | `.agents/skills/` ✅ | 📄 模型选择器，**可在对话中途切换** |
 
-**共同铁律**：design 与 code 不同模型；review 与 code 不同且更强。型号只写 `config/host.local.json`（未跟踪）。
+**共同铁律**：design 与 code 不同模型；review 与 code 不同且更强。型号在 `config/host.example.json`（已跟踪、开箱可用）；本机差异写 `config/host.local.json`（未跟踪），G0 优先读它、没有就回退到 example。
 
 出处：[Codex skills](https://developers.openai.com/codex/skills)、[Codex config reference（官方文档镜像）](https://github.com/crasuna/openai-dev-docs-cn-mirror/blob/main/sources/en/codex/config-reference.md)、[Claude Code sub-agents](https://code.claude.com/docs/en/sub-agents)、[opencode skills](https://opencode.ai/docs/skills)、[opencode agents](https://opencode.ai/docs/agents)、[Cursor skills](https://prod.cursor.com/help/customization/skills)、[Cursor 模型切换](https://cursor.com/docs/agent/prompting)。
 

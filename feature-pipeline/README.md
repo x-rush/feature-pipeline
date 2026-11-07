@@ -22,7 +22,7 @@
 2. **编码端必须费率恒定**：长会话会让按量计费的模型变贵，编码模型要选不随上下文涨价的那一档。
 3. **宿主至少能提供两个模型**。只有一个模型时，G4 走「新会话 + 换提示词」并在状态文件记 `review_degraded: true`——这是**记录在案的降级**，不是「跨模型评审通过」。
 
-`gears.json` 只写三个角色的**能力要求**（`roles`），不写任何型号。真实型号放 `config/host.local.json`（未跟踪，见 `config/host.example.json`）；G0 时解析并写进 `.pipeline.json`。
+`gears.json` 只写三个角色的**能力要求**（`roles`），不写任何型号。具体型号在 `config/host.example.json`（已跟踪、开箱可用）；本机要覆盖就建 `config/host.local.json`（被忽略）。G0 按 `host_config` 的回退顺序取第一个存在的文件，解析后写进 `.pipeline.json`。
 
 ---
 

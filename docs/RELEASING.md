@@ -23,9 +23,10 @@
 
 ```
 config/
-  forbidden.example.json   # 已跟踪：只有占位符，可公开
-  host.local.json          # 未跟踪：真实型号/成本/内部路径（.gitignore 已加）
-  forbidden.local.json     # 未跟踪：真实的内部名称正则
+  host.example.json       # 已跟踪：开箱可用的 Easy Code + Codex 配置（公开数据）
+  forbidden.example.json  # 已跟踪：密钥规则 + 一个自定义占位
+  host.local.json         # 可选、未跟踪：本机覆盖（不同宿主/目录时才有）
+  forbidden.local.json    # 可选、未跟踪：你自己的内部词表
 ```
 
 ### 当前状态
@@ -55,7 +56,7 @@ config/
 
 - **没有双写**：公开仓库就是内部仓库，唯一差别是本地那两个未跟踪文件。
 - **没有同步冲突**：不存在"公开改了、私有没改"的问题。
-- **代价**：克隆这个仓库的人必须自己填 `config/host.local.json`。README 已经写明"型号由 G0 按宿主解析"，所以这不违背设计——它本来就假设型号是宿主相关的。
+- **克隆即可用**：`config/host.example.json` 已含 Easy Code 的真实映射，克隆下来不需要填任何东西；本机要差异化才建 `config/host.local.json`，G0 会优先读它。
 
 ### 什么时候升级到方案 B
 

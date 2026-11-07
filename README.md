@@ -25,7 +25,7 @@ feature-pipeline/        150 行  大需求才加载：需求 → 设计 → 编
 设计 "强推理"  ──  编码 "廉价且长上下文不涨价"  ──  评审 "异族且不弱于编码"
 ```
 
-> 本仓库用**能力槽**（design / code / review）而不是固定型号描述分工；`docs/HOSTS.md` 里给了 Easy Code 的公开型号与费率作为可照抄的参考配置。宿主相关的部分放 `config/host.local.json`（未跟踪），这样同一个仓库既能内部用，也能直接公开。
+> 本仓库用**能力槽**（design / code / review）而不是固定型号描述分工；`config/host.example.json` 里就是 Easy Code 的公开型号与费率（开箱可用）。宿主相关的差异放 `config/host.local.json`（未跟踪），G0 优先读它、没有就回退到 example——所以克隆下来不会缺件。
 
 三条让它成立的前提：
 
@@ -81,7 +81,7 @@ G0 定档 ──► G1 需求 ──► G2 设计 ──► G3 编码自验 ─�
 | 评审轮次 | 1 | 1 | 2（第 2 轮只找反例） |
 | 成本档位 | low | medium | high |
 
-模型选择、`plan_fields`、派发技能、属性定义、状态机字段全部在 `feature-pipeline/gears.json`，这里不抄第二份——这次修订前抄了三份，已经漂了（档位表与属性定义各出现过两套）。具体型号在 `config/host.local.json`（未跟踪），G0 解析后写进状态文件。
+模型选择、`plan_fields`、派发技能、属性定义、状态机字段全部在 `feature-pipeline/gears.json`，这里不抄第二份——这次修订前抄了三份，已经漂了（档位表与属性定义各出现过两套）。具体型号在 `config/host.example.json`（已跟踪、开箱可用），本机要覆盖就新建 `config/host.local.json`（被忽略），G0 按 `host_config` 的回退顺序取第一个存在的文件，解析后写进状态文件。
 
 **可逆性优先于规模**：六个文件但干净可回滚、不跨模块 → low；四个文件但跨模块或在无测试代码上 → high。
 

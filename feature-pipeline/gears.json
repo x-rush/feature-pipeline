@@ -135,8 +135,8 @@
     "review_materials": ["diff", "spec", "plan", "blockers", "history", "blast_radius"],
     "blocker_threshold": 1
   },
-  "host_config": "config/host.local.json",
-  "host_config_example": "config/host.example.json",
+  "host_config": ["config/host.local.json", "config/host.example.json"],
+  "host_config_rule": "Read the first path that exists, then take its hosts[active] entry. The first entry is an optional git-ignored override; the last entry is tracked, so a fresh clone always has a working config.",
   "roles": {
     "design": "strongest reasoning: writes interfaces, seams and failure paths in one pass",
     "code": "cheapest flat-rate model: translates the plan into diffs, makes no design calls",
