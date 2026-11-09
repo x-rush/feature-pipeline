@@ -5,8 +5,10 @@
 //   node scripts/check-public-safe.mjs --dist <dir> # scan an exported/public copy
 //   node scripts/check-public-safe.mjs --list       # show the active pattern list
 //
-// Patterns come from config/forbidden.local.json when it exists (git-ignored),
-// otherwise from config/forbidden.example.json (publishable placeholders).
+// Patterns come from feature-pipeline/config/forbidden.local.json when it exists
+// (git-ignored), otherwise from the tracked forbidden.example.json beside it.
+// The config travels with the skill; repo-root config/ is still accepted so older
+// checkouts keep working.
 // Exit codes: 0 clean · 1 forbidden hit · 2 config missing/unreadable.
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -17,11 +19,13 @@ import { execFileSync } from 'node:child_process';
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '..');
 
-const LOCAL = join(repoRoot, 'config', 'forbidden.local.json');
-const EXAMPLE = join(repoRoot, 'config', 'forbidden.example.json');
+const SKILL_CONFIG = join(repoRoot, 'feature-pipeline', 'config');
+const firstExisting = (...paths) => paths.find((p) => existsSync(p)) ?? paths[paths.length - 1];
+const LOCAL = firstExisting(join(SKILL_CONFIG, 'forbidden.local.json'), join(repoRoot, 'config', 'forbidden.local.json'));
+const EXAMPLE = firstExisting(join(SKILL_CONFIG, 'forbidden.example.json'), join(repoRoot, 'config', 'forbidden.example.json'));
 
 // Never scanned: the config itself, this script, and VCS noise.
-const SKIP = ['.git', 'node_modules', 'dist', 'config', 'scripts/check-public-safe.mjs'];
+const SKIP = ['feature-pipeline/config', '.git', 'node_modules', 'dist', 'config', 'scripts/check-public-safe.mjs'];
 
 const TEXT = new Set(['.md', '.json', '.mjs', '.js', '.ts', '.yml', '.yaml', '.txt', '.sh', '.ps1']);
 
@@ -92,7 +96,7 @@ const active = patterns
   .map((p) => ({ ...p, re: new RegExp(p.regex, 'gi') }));
 
 if (!active.length) {
-  console.log(`no active patterns (${patternFile}); copy it to config/forbidden.local.json and fill in your internal names.`);
+  console.log(`no active patterns (${patternFile}); copy it to feature-pipeline/config/forbidden.local.json and fill in your internal names.`);
   process.exit(0);
 }
 
