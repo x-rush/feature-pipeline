@@ -11,7 +11,7 @@
 | 闸门、判据、模板、状态机 | 仓库 |
 | 型号 id、Easy Code 费率与档位成本 | 仓库（公开数据，见 `HOSTS.md` §5） |
 | 密钥、令牌、客户名、未发布路线图 | 本地 `config/*.local.json`（git-ignored） |
-| 当前宿主、机器相关路径 | 本地 `config/host.local.json` |
+| 当前宿主、机器相关路径 | 本地 `feature-pipeline/config/host.local.json` |
 
 判断标准只有一条：**这条信息是否本来就对外可见**。对外可见的进仓库，只有你自己知道的留本地。
 
@@ -35,7 +35,7 @@ config/
 - **工作区 clean**：`node scripts/check-public-safe.mjs` 通过（当前只剩密钥一类规则）。
 - **型号与费率已公开**：`docs/HOSTS.md` §5 写的是 Easy Code 公开的型号映射与档位成本，不需要再遮。
 
-新克隆的人**通常什么都不用填**：`config/host.example.json` 就是开箱可用的 Easy Code + Codex 配置（公开数据）。只在你的宿主或型号目录不同时才需要覆盖：
+新克隆的人**通常什么都不用填**：`feature-pipeline/config/host.example.json` 就是开箱可用的 Easy Code + Codex 配置（公开数据）。只在你的宿主或型号目录不同时才需要覆盖：
 
 1.（可选）`cp config/host.example.json config/host.local.json`，改 `active` 与 `models` 成你当前宿主的真实取值；只有一个模型就设 `review_degraded: true`。
 2.（可选）`cp config/forbidden.example.json config/forbidden.local.json`，把你自己的内部词表加进 `patterns`——没有就别建，密钥规则已经在 example 里生效。
@@ -56,7 +56,7 @@ config/
 
 - **没有双写**：公开仓库就是内部仓库，唯一差别是本地那两个未跟踪文件。
 - **没有同步冲突**：不存在"公开改了、私有没改"的问题。
-- **克隆即可用**：`config/host.example.json` 已含 Easy Code 的真实映射，克隆下来不需要填任何东西；本机要差异化才建 `config/host.local.json`，G0 会优先读它。
+- **克隆即可用**：`feature-pipeline/config/host.example.json` 已含 Easy Code 的真实映射，克隆下来不需要填任何东西；本机要差异化才建 `feature-pipeline/config/host.local.json`，G0 会优先读它。
 
 ### 什么时候升级到方案 B
 

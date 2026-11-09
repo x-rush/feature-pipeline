@@ -135,14 +135,14 @@
     "review_materials": ["diff", "spec", "plan", "blockers", "history", "blast_radius"],
     "blocker_threshold": 1
   },
-  "host_config": ["config/host.local.json", "config/host.example.json"],
-  "host_config_rule": "Read the first path that exists, then take its hosts[active] entry. The first entry is an optional git-ignored override; the last entry is tracked, so a fresh clone always has a working config.",
+  "host_config": ["${SKILL_DIR}/config/host.local.json", "${SKILL_DIR}/config/host.example.json"],
+  "host_config_rule": "Read the first path that exists, then take its hosts[active] entry. ${SKILL_DIR} is the directory holding this SKILL.md, so the config travels with the skill instead of depending on the caller's cwd. The first entry is an optional git-ignored override; the last is tracked, so a fresh clone always has a working config.",
   "roles": {
     "design": "strongest reasoning: writes interfaces, seams and failure paths in one pass",
     "code": "cheapest flat-rate model: translates the plan into diffs, makes no design calls",
     "review": "a different model, ideally a different family, and never weaker than code: reads diff + spec, hunts counterexamples"
   },
-  "roles_note": "No model ids are committed here: the three roles are the contract, the ids are per host. At G0 read host_config (default config/host.local.json, git-ignored) or resolve against the host catalog, then write the ids into .pipeline.json.models.",
+  "roles_note": "No model ids are committed here: the three roles are the contract, the ids are per host. At G0 read host_config (default feature-pipeline/config/host.local.json, git-ignored) or resolve against the host catalog, then write the ids into .pipeline.json.models.",
   "model_note": "If host_config is absent, resolve design/code/review at G0 from the host's own catalog. If the host offers no second model, set models.review_degraded and follow SKILL.md G4.",
   "est_note": "Cost is expressed as a tier only (low / medium / high). Absolute figures, if any, stay in the git-ignored host config.",
   "constants": {

@@ -4,4 +4,4 @@
 # pipeline artifacts are local by default; un-ignore a feature dir if you want it in a PR
 features/
 graphify-out/
-config/*.local.json
+**/config/*.local.json

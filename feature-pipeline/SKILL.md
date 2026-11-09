@@ -56,7 +56,7 @@ If a dispatched skill is not installed, **apply its criteria by hand**, record `
 {"slug":"login-throttle","gear":"high","gear_source":"auto","attrs":["cross_module"],"models":{"design":"<host>","code":"<host>","review":"<host>","review_degraded":false},"stage":"G2","verdict":null,"rounds":{"review":0},"risk_ack":null,"missing_skills":[],"state_mismatch":false,"dirty_files":[]}
 ```
 
-**Model IDs come from the host, not from this file.** `gears.json` `roles` says what each stage needs (strong reasoning / cheap flat-rate / different family); at G0 read the first existing path in `host_config` (local override first, then the tracked example), take that file's `active` host entry, and write the resolved ids into `models`. If the host has no second model, say so now, not at G4.
+**Model IDs come from the host, not from this file.** `gears.json` `roles` says what each stage needs (strong reasoning / cheap flat-rate / different family); at G0 read the first existing path in `host_config` (local override first, then the tracked example), take that file's `active` host entry. `${SKILL_DIR}` is the directory holding this SKILL.md — resolve it before testing the paths, so a `cp -R` install and an in-repo checkout both work, and write the resolved ids into `models`. If the host has no second model, say so now, not at G4.
 
 **Attributes are add-only and may be added at any gate**: G0 sets the initial set; `hard_bug` appears only at G3, `rework` only after a G4 FAIL. Definitions in `gears.json` `attributes`.
 

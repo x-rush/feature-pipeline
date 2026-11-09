@@ -12,7 +12,7 @@
 | **opencode** | `.opencode/skills`、`~/.config/opencode/skills`，**兼容** `.agents/skills`、`.claude/skills` 及其 user 级 | `.agents/skills/` ✅ | 📄 `agents.<id>.model`（`provider/model#variant`） |
 | **Cursor** | `.cursor/skills`、`.agents/skills`、`~/.cursor/skills`、`~/.agents/skills`，**兼容** `.claude`、`.codex` | `.agents/skills/` ✅ | 📄 模型选择器，**可在对话中途切换** |
 
-**共同铁律**：design 与 code 不同模型；review 与 code 不同且更强。型号在 `config/host.example.json`（已跟踪、开箱可用）；本机差异写 `config/host.local.json`（未跟踪），G0 优先读它、没有就回退到 example。
+**共同铁律**：design 与 code 不同模型；review 与 code 不同且更强。型号在 `feature-pipeline/config/host.example.json`（已跟踪、开箱可用）；本机差异写 `feature-pipeline/config/host.local.json`（未跟踪），G0 优先读它、没有就回退到 example。
 
 出处：[Codex skills](https://developers.openai.com/codex/skills)、[Codex config reference（官方文档镜像）](https://github.com/crasuna/openai-dev-docs-cn-mirror/blob/main/sources/en/codex/config-reference.md)、[Claude Code sub-agents](https://code.claude.com/docs/en/sub-agents)、[opencode skills](https://opencode.ai/docs/skills)、[opencode agents](https://opencode.ai/docs/agents)、[Cursor skills](https://prod.cursor.com/help/customization/skills)、[Cursor 模型切换](https://cursor.com/docs/agent/prompting)。
 
@@ -156,24 +156,28 @@ cp -R /tmp/sp/skills/* ~/.easycode-user/skills/
 
 **换模型**：Easy Code 的 mod / skill 扩展面**没有模型切换 API**（本仓库早期版本记录的已知限制），所以三档对应的模型是**在宿主 UI 里手动切**，G4 必须新开会话。
 
-这份配置已经写进 `config/host.example.json`（开箱可用，不需要自己填）。G0 会把 `invocation` 打印出来，你照着切就行。下面是 Easy Code **公开的产品数据**：
+这份配置已经写进 `feature-pipeline/config/host.example.json`（开箱可用，不需要自己填）。G0 会把 `invocation` 打印出来，你照着切就行。下面是 Easy Code **公开的产品数据**：
 
 | 角色 | low | high | max | 说明 |
 |---|---|---|---|---|
-| design | `gpt-6.1-terra` | `gpt-6.1-sol` | `gpt-6-astra` | 官方定位：astra 最强 → sol 接近 astra 但更便宜 → terra 快而省 → luna 最省 |
-| code | `gpt-6-luna` | 同左 | 同左 | 编码不用换档，最省的那个够用 |
-| review | `gpt-6.1-sol` | `gpt-6-astra` | `gpt-6-astra` | 与 code 不同族级，且能力高于 code |
+| design | `gpt-6.1-terra` | `gpt-6.1-sol` | `claude-opus-5-5` | 只跑 3–5 轮，取账户内最强；`gpt-6-astra` 不在标准目录里，选不到 |
+| code | `deepseek-flash` | 同左 | 同左 | **必须无 `highVolumeThreshold`**：长会话费率恒定，不会在编码中途涨档 |
+| review | `claude-haiku-5-5` | `gemini-4-argon` | `claude-sonnet-5-5` | 与 code 不同族，且三档都高于 code |
 
-官方公开定价（美元 / 百万 token）：`gpt-6-astra` 最强档位价、`gpt-6.1-sol` \$2 / \$10、`gpt-6.1-terra` \$1 / \$5、`gpt-6-luna` \$0.1 / \$0.5。
+三条硬约束（按顺序校验，缺一条就换型号）：
+
+1. **code 必须 flat-rate**：编码会话通常 20 万 token 以上，任何带阈值的型号都会在会话中途跳到高价档
+2. **review 必须跨族且 ≥ code**：评审是唯一负责“发现错误”的环节，弱于被审者等于没有
+3. **design.max 只能取目录内最强**：不可逆改动靠它一次想对，不宜再试第二次
 
 单次功能的相对成本（Easy Code 公开数据，仅作档位间的横向比较）：
 
 ```json
 "easycode": {
   "models": {
-    "design": { "low": "gpt-6.1-terra", "high": "gpt-6.1-sol", "max": "gpt-6-astra" },
-    "code": "gpt-6-luna",
-    "review": { "low": "gpt-6.1-sol", "high": "gpt-6-astra", "max": "gpt-6-astra" }
+    "design": { "low": "gpt-6.1-terra", "high": "gpt-6.1-sol", "max": "claude-opus-5-5" },
+    "code": "deepseek-flash",
+    "review": { "low": "claude-haiku-5-5", "high": "gemini-4-argon", "max": "claude-sonnet-5-5" }
   },
   "invocation": {
     "design": "在本宿主 UI 里切到 models.design[gear]",

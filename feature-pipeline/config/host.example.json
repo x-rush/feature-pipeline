@@ -5,9 +5,9 @@
     "easycode": {
       "_note": "Switch models in the host UI; there is no switching API, so a stage change is a manual switch or a new session.",
       "models": {
-        "design": { "low": "gpt-6.1-terra", "high": "gpt-6.1-sol", "max": "gpt-6-astra" },
-        "code": "gpt-6-luna",
-        "review": { "low": "gpt-6.1-sol", "high": "gpt-6-astra", "max": "gpt-6-astra" }
+        "design": { "low": "gpt-6.1-terra", "high": "gpt-6.1-sol", "max": "claude-opus-5-5" },
+        "code": "deepseek-flash",
+        "review": { "low": "claude-haiku-5-5", "high": "gemini-4-argon", "max": "claude-sonnet-5-5" }
       },
       "invocation": {
         "design": "在本宿主 UI 里切到 models.design[gear]",

@@ -114,7 +114,10 @@ const trackedDefault = entries[entries.length - 1];
 const override = entries[0];
 if (!override.includes('.local.')) note(`host_config override ${override} is not a *.local.json path`);
 
-const defaultValue = resolve(root, trackedDefault);
+// ${SKILL_DIR} is the directory holding feature-pipeline/SKILL.md, so the config
+// travels with the skill instead of depending on the caller's cwd.
+const resolveSkill = (p) => resolve(root, p.replace(/^\$\{SKILL_DIR\}/, 'feature-pipeline'));
+const defaultValue = resolveSkill(trackedDefault);
 if (!existsSync(defaultValue)) {
   fail(`host_config default ${trackedDefault} is missing — a fresh clone would have no config`);
 } else {
@@ -141,7 +144,7 @@ if (!existsSync(defaultValue)) {
   }
   // the default must be committed, otherwise clones do not get it
   try {
-    execFileSync('git', ['ls-files', '--error-unmatch', trackedDefault], { cwd: root, stdio: 'ignore' });
+    execFileSync('git', ['ls-files', '--error-unmatch', relative(root, defaultValue)], { cwd: root, stdio: 'ignore' });
   } catch {
     fail(`${trackedDefault} exists but is not tracked by git — a clone would not get it`);
   }
