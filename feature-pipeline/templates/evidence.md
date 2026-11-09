@@ -8,6 +8,13 @@
 - `missing_skills`：
 - `state_mismatch`：
 
+## 命令与基准（后续评审要引用，不许留空）
+- `commands.test`：
+- `base_ref`：
+- `degraded_verification`：false / true（true 时写明替代验证方式）
+- 本次实际执行的命令（按顺序逐条）：
+- 断言未被削弱的证据：`git diff --numstat <base_ref> -- <test paths>` 输出
+
 ## 台账快照
 - 有 `executing-plans`：照它定义的 `progress.md` 格式；任务完成 x / y，列出未完成项，无则写「无」
 - 没有该技能：用下表，不要自造轮次计数器

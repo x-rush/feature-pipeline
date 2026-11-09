@@ -9,6 +9,7 @@
 - 评审模型：<model id>
 - `review_degraded`：false
 - 输入材料：diff、spec（high 加 plan + blockers；max 加 history + blast_radius）
+- `base_ref` 与 diff 命令：`git diff <base_ref>...HEAD`
 
 ## 验证方法（必填，写不出就是没评审）
 - 读了哪些文件：

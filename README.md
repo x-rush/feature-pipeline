@@ -147,6 +147,22 @@ node scripts/check-skills.mjs --skills   # 逐条列出还缺哪个
 - 日常任务：什么都不用说，`coding-skill-arbiter` 会自己出决定卡
 - 开关：「省钱」「稳一点」「加一轮评审」「只看不写」「别加载技能」
 
+## G0 预检（把判断变成测量）
+
+```bash
+node <skills-dir>/feature-pipeline/scripts/preflight.mjs --pretty
+```
+
+一条命令给出三个后面阶段必须引用的东西，G0 把它们写进 `.pipeline.json`：
+
+| 字段 | 作用 |
+|---|---|
+| `commands` | test / lint / build：G1 写 AC 时引用，G3 贴输出时引用 |
+| `base_ref` | G4 的 diff 基准（`git diff <base_ref>...HEAD`），评审在新会话里也能拿到 |
+| `dirty_files` | 防跑偏规则 4 的豁免名单：只有 G0 时干净的文件才允许 `git restore` |
+
+**没有测试命令时不糊弄**：置 `degraded_verification: true`，每条 AC 改用「记录的命令 + 粘贴输出」验证——手工可以，无记录不行。
+
 ## 语言约定
 
 指令正文是英文（token 更省）；**与你对话、以及所有产出文档一律用你的语言**（默认中文）——`spec.md`、`plan.md`、`evidence.md`、`review*.md` 都是给人核验的，英文文档等于无法验收。

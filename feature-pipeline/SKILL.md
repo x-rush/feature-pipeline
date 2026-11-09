@@ -32,7 +32,6 @@ This file is English to save tokens. **Speak to the user, and write every artifa
 4. **Never dispatch**: `ask-matt`, `using-superpowers`, `to-tickets`/`triage`/`wayfinder`/`implement`/`implement-spec`.
 
 ## Missing skills
-
 If a dispatched skill is not installed, **apply its criteria by hand**, record `missing:<skill>` in `evidence.md` and `.pipeline.json.missing_skills`, and tell the user once. A gate never passes on a missing skill's behalf.
 
 ## G0 — pick the gear, record the attributes
@@ -48,13 +47,15 @@ If a dispatched skill is not installed, **apply its criteria by hand**, record `
 | (3) >= 6 files, fully revertible, one module | **low** |
 | (4) none of the above | **exit** |
 
-**Reversibility beats size.** Six files that revert cleanly inside one module are low *because* they are reversible; four files crossing modules or sitting on untested code are high. (Checking `>=4 files` before `>=6` made rule 3 unreachable — do not reintroduce that order.)
+**Reversibility beats size.** Six files that revert cleanly inside one module are low *because* they are reversible; four files crossing modules or sitting on untested code are high.
 
 **State file.** Create `features/<slug>/` (add `features/` to the *target* repo's `.gitignore`; un-ignore one feature dir if you want its artifacts in the PR) and copy `templates/pipeline.json`. The state file is authoritative for `stage`/`verdict`; artifacts are evidence; on conflict trust the file and set `state_mismatch: true`. Record the files already dirty at G0 in `dirty_files` — anti-drift rule 4 depends on that list.
 
 ```json
 {"slug":"login-throttle","gear":"high","gear_source":"auto","attrs":["cross_module"],"models":{"design":"<host>","code":"<host>","review":"<host>","review_degraded":false},"stage":"G2","verdict":null,"rounds":{"review":0},"risk_ack":null,"missing_skills":[],"state_mismatch":false,"dirty_files":[]}
 ```
+
+**Run `node ${SKILL_DIR}/scripts/preflight.mjs` first** and copy `commands`, `base_ref` and `dirty_files` out of its JSON into the state file. Later gates cite those three: without a recorded test command G3 has no evidence to paste, and without `base_ref` G4 has nothing to diff. If no test command is detected, set `degraded_verification: true` — each AC then verifies with a recorded command plus its pasted output; manual is allowed, unrecorded is not.
 
 **Model IDs come from the host, not from this file.** `gears.json` `roles` says what each stage needs (strong reasoning / cheap flat-rate / different family); at G0 read the first existing path in `host_config` (local override first, then the tracked example), take that file's `active` host entry. `${SKILL_DIR}` is the directory holding this SKILL.md — resolve it before testing the paths, so a `cp -R` install and an in-repo checkout both work, and write the resolved ids into `models`. If the host has no second model, say so now, not at G4.
 
@@ -81,7 +82,6 @@ Exit check
 **3. Templates are the criteria.** Open the template for the stage and fill it in. Missing fields mean the gate is not passed. Never write the format from memory.
 
 ## Stage tracking
-
 Read the disk at the start — never rely on memory:
 
 - `.pipeline.json` exists -> take `stage` and `verdict` from it, then verify the matching artifact exists; if it does not, re-derive and set `state_mismatch: true`.
@@ -91,7 +91,7 @@ Read the disk at the start — never rely on memory:
 
 ## G1 — requirements
 
-**Template** `templates/spec.md`. **Criteria**: 3-7 ACs, each with an executable verification command (no "works", "as expected"); non-goals non-empty; open questions cleared or assigned; with `terminology`, a glossary is mandatory (definition + banned synonyms).
+**Template** `templates/spec.md`. **Criteria**: 3-7 ACs, each with an executable verification command (no "works": cite `commands.test` or a recorded command plus the expected output); non-goals non-empty; open questions cleared or assigned; with `terminology`, a glossary is mandatory (definition + banned synonyms).
 
 **Next**: `spec.md` / G2 (same session) / model unchanged / opening line "draft plan.md from spec.md" (low gear's `merge_g1g2` means one pass producing both `spec.md` and `plan.md`; G1's exit check still applies first).
 
@@ -109,7 +109,7 @@ Read the disk at the start — never rely on memory:
 
 **Template** `templates/evidence.md`. Use the `progress.md` ledger and per-task commits that `executing-plans` defines; if that skill is missing, keep a three-column task ledger inside `evidence.md` instead of inventing a turn counter.
 
-**Criteria**: paste the full test output (failures + exit code); every AC marked PASS/FAIL/UNVERIFIED; `git diff --stat test/` empty or additions only; no `TODO` / `not implemented` / debug logging; no tests added outside the agreed seam.
+**Criteria**: paste the full test output (failures + exit code); every AC marked PASS/FAIL/UNVERIFIED; `git diff --numstat <base_ref> -- <test paths>` shows zero deletions (new test files are additions, which are allowed); no `TODO` / `not implemented` / debug logging; no tests added outside the agreed seam.
 
 **Five anti-drift rules**: (1) one commit per task; (2) open each turn with `current T3 (3/8)`; (3) every 5 turns print `plan 3/8, AC 2/5`; (4) touched a file outside the plan -> restore it **only when that file was clean at G0** (`git restore <file>`); if it was already dirty at G0, stop and ask — never destroy unrecorded work; (5) tests shrunk or assertions edited -> automatic fail.
 
@@ -131,7 +131,7 @@ Send only `spec.md` + `plan.md` + `blocker-n.md`, never the whole failed transcr
 
 `code-review` runs axes 1-2, one subagent each. **Adversarial first**: do not ask "does this look wrong" but *construct a counterexample for each AC*; only when none succeeds may it pass.
 
-**Give**: diff + spec (high adds plan + blockers; max adds failure history + blast radius). **Withhold**: the coding session's conversation and justifications.
+**Give**: `git diff <base_ref>...HEAD` + spec (high adds plan + blockers; max adds failure history + blast radius). **Withhold**: the coding session's conversation and justifications.
 
 **Verdict**: any axis FAIL -> overall FAIL; return to G3 with `rework` (root cause in the spec -> G1). **A zero-finding PASS is valid** when every AC lists the counterexample attempt and the command behind it — an unexplained "no findings" invalidates the review, not the absence of findings. max runs two rounds; round 2 hunts counterexamples only.
 

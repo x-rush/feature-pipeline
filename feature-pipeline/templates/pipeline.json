@@ -9,6 +9,9 @@
     "review": "<resolve at G0 from the host catalog>",
     "review_degraded": false
   },
+  "commands": { "test": null, "lint": null, "build": null },
+  "base_ref": "<sha from scripts/preflight.mjs>",
+  "degraded_verification": false,
   "stage": "G0",
   "verdict": null,
   "rounds": {
