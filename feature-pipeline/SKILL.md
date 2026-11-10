@@ -113,7 +113,7 @@ Read the disk at the start — never rely on memory:
 
 ## BLOCKED (3 red rounds; 1 in max)
 
-**Write `templates/blocker.md` first, then decide where to go** — otherwise "stuck" becomes the standard excuse. It must contain actual-vs-expected behaviour; if it cannot, the code was never debugged and no rollback is allowed.
+A red round is one test run on the same task that does not lower the failure count; count it in `rounds.red` and reset it on a new task. **Write `templates/blocker.md` first, then decide where to go** — otherwise "stuck" becomes the standard excuse. It must contain actual-vs-expected behaviour; if it cannot, the code was never debugged and no rollback is allowed.
 
 | plan gap / plan wrong | back to **G2** | AC itself wrong | back to **G1** | implementation or environment | **stay in G3**, set `hard_bug` and escalate to `diagnosing-bugs` |
 
