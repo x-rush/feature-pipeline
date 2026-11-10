@@ -57,7 +57,7 @@ If a dispatched skill is not installed, **apply its criteria by hand**, record `
 
 **Attributes are add-only and may be added at any gate**: G0 sets the initial set; `hard_bug` appears only at G3, `rework` only after a G4 FAIL. Definitions in `gears.json` `attributes`.
 
-**Gears only go up mid-flight**: upgrading adds the missing fields and tests but never re-runs a passed gate. Downgrading re-runs G0 with `gear_source:"downgrade"` — a re-baseline, not a mid-flight downgrade.
+**Gears only go up mid-flight**: upgrading adds the missing fields and tests but never re-runs a passed gate — except an upgrade to max, which re-runs G2 with the max design model. Downgrading re-runs G0 with `gear_source:"downgrade"` — a re-baseline, not a mid-flight downgrade.
 
 ## Three mechanisms used at every gate
 
@@ -95,7 +95,7 @@ Read the disk at the start — never rely on memory:
 
 **Template** `templates/plan-<gear>.md`; fields per `plan_fields`, **`seams` mandatory**.
 
-**Criteria**: every change traces to an `ACn`; **test seam chosen first — one layer, ideally one seam** (`codebase-design` supplies the deep-module / interface / seam vocabulary); every task has a test; no unapproved dependency; **no** "could consider", "maybe", "similar to before".
+**Criteria**: every change traces to an `ACn`; **test seam chosen first — one layer, ideally one seam** (`codebase-design` supplies the deep-module / interface / seam vocabulary); every task has a test; no unapproved dependency; **no** "could consider", "maybe", "similar to before"; no task depends on an open question in spec.md; **re-check the gear against the plan's file list** with the G0 table and upgrade if it now says higher.
 
 **Four-question self-check** (answer without writing code): which files / which method / which test proves it / **is there anything a human must decide**. The fourth answer must be "no".
 
