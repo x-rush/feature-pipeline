@@ -20,7 +20,7 @@ This file is written in English to save tokens. **Always speak to the user, and 
 | Layer | Basis | Cost |
 |---|---|---|
 | **L0 explicit** | user names a skill or a gear | 0 |
-| **L1 disk facts** | `features/*/.pipeline.json` exists -> already in the pipeline; hand over and **exit this skill** | 0 |
+| **L1 disk facts** | a `features/*/.pipeline.json` whose `stage` is not `done` -> active pipeline; hand over and **exit this skill**. Several active -> list their slugs on the card and ask which; `done` ones are history | 0 |
 | **L2 observable signals** | <= 3 commands -> task attributes | low |
 | **L3 defaults** | ownership table | 0 |
 | **L4 ask** | only if irreversible and the user has not said which way, or the two packs give opposite verdicts | one turn |
@@ -50,6 +50,8 @@ If it is a single file, under ~30 lines, and either covered by tests or pure cop
 1. Make the change.
 2. Run the verification command and paste its output.
 3. One sentence: what changed, what was verified.
+
+**Middle lane** (2-3 files, no escalation trigger): use the card's skills, and fast-lane step 2 still applies — no claim without pasted verification output.
 
 **Do not add process to the fast lane.** Anything loaded stays in history and is re-sent every turn; routing must not become the cost.
 
