@@ -109,7 +109,7 @@ Read the disk at the start — never rely on memory:
 
 **Five anti-drift rules**: (1) one commit per task; (2) open each turn with `current T3 (3/8)`; (3) every 5 turns print `plan 3/8, AC 2/5`; (4) touched a file outside the plan -> restore it **only when that file was clean at G0** (`git restore <file>`); if it was already dirty at G0, stop and ask — never destroy unrecorded work; (5) tests shrunk or assertions edited -> automatic fail.
 
-**Next**: `evidence.md` / G4 (**must be a fresh session**) / switch to `models.review` / opening line "diff and spec only, judge each AC".
+**Next**: `evidence.md` / G4 (**must be a fresh session**) / switch to `models.review` / opening line "review features/<slug>/: run `git diff <base_ref>...HEAD`, judge each AC in spec.md".
 
 ## BLOCKED (3 red rounds; 1 in max)
 
@@ -127,13 +127,13 @@ Send only `spec.md` + `plan.md` + `blocker-n.md`, never the whole failed transcr
 
 `code-review` runs axes 1-2, one subagent each. **Adversarial first**: do not ask "does this look wrong" but *construct a counterexample for each AC*; only when none succeeds may it pass.
 
-**Give**: `git diff <base_ref>...HEAD` + spec (high adds plan + blockers; max adds failure history + blast radius). **Withhold**: the coding session's conversation and justifications.
+**Give**: `git diff <base_ref>...HEAD` + spec (high adds plan + blockers; max adds failure history + blast radius). **Withhold**: the coding session's conversation and justifications. `evidence.md` is a map, not proof: re-run `commands.test` and every AC command yourself.
 
 **Verdict**: any axis FAIL -> overall FAIL; return to G3 with `rework` (root cause in the spec -> G1). **A zero-finding PASS is valid** when every AC lists the counterexample attempt and the command behind it — an unexplained "no findings" invalidates the review, not the absence of findings. max runs two rounds; round 2 hunts counterexamples only.
 
 **One-model hosts**: run G4 in a fresh session with a different prompt, write `review_degraded: true` in the state file and `review.md`, and tell the user — a recorded degradation, never a silent PASS of baseline 3.
 
-**Next**: verdict / PASS -> `finishing-a-development-branch` + `pr`; FAIL -> G3 with the fix list keyed by AC number.
+**Next**: verdict / PASS -> `finishing-a-development-branch` + `pr` (low: summarise the diff and stop — commit and PR are the user's call); FAIL -> G3 with the fix list keyed by AC number.
 
 ## Three baselines (no gear, no attribute, no exception)
 
