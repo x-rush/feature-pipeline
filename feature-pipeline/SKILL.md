@@ -81,7 +81,7 @@ Exit check
 Read the disk at the start — never rely on memory:
 
 - `.pipeline.json` exists -> take `stage` and `verdict` from it, then verify the matching artifact exists; if it does not, re-derive and set `state_mismatch: true`.
-- No `.pipeline.json` -> G0; no `spec.md` -> G1; no `plan.md` -> G2; no `evidence.md` **or any AC row without a verdict** -> G3; no review file -> G4; latest review FAIL -> G3 with `rework`; latest review PASS -> done.
+- No `.pipeline.json` -> G0; no `spec.md`, or `spec_approved` false -> G1; no `plan.md` -> G2; no `evidence.md` **or any AC row without a verdict** -> G3; no review file -> G4; latest review FAIL -> G3 with `rework`; latest review PASS -> write `retro.md`, then done (no `retro.md`, not done).
 
 **A FAIL returns to G3, never to G4.** The rule reads the *latest* review file only, and `verdict` in the state file outranks it either way. Reviews are never overwritten: `review.md` = round 1, `review-r2.md` = round 2 (max), `review-r3.md` after a second rework. **After every rework G4 runs one verification round** — it does not consume `review_rounds`, it is what turns a FAIL into a PASS — and a third rework escalates to G1 instead of a fourth round. "Has a verdict" means every AC row in `evidence.md` is PASS/FAIL/UNVERIFIED — an empty cell is unchecked, and UNVERIFIED never counts as PASS.
 
@@ -89,7 +89,7 @@ Read the disk at the start — never rely on memory:
 
 **Template** `templates/spec.md`. **Criteria**: 3-7 ACs, each with an executable verification command (no "works": cite `commands.test` or a recorded command plus the expected output); non-goals non-empty; open questions cleared or assigned; with `terminology`, a glossary is mandatory (definition + banned synonyms).
 
-**Next**: `spec.md` / G2 (same session) / model unchanged / opening line "draft plan.md from spec.md" (low gear's `merge_g1g2` means one pass producing both `spec.md` and `plan.md`; G1's exit check still applies first).
+**Stop: the user approves the ACs** before G2 — set `spec_approved: true` only on their word; low gear stops here too. **Next**: `spec.md` / G2 (same session) / model unchanged / opening line "draft plan.md from spec.md" (low gear's `merge_g1g2` keeps G1 and G2 in one session; the approval stop still sits between them).
 
 ## G2 — design
 
