@@ -45,7 +45,7 @@
 > 空白 = 未核对；**UNVERIFIED 不算 PASS**。
 
 ## 残留检查
-- [ ] `git diff --stat test/` 为空或仅新增
+- [ ] `git diff --numstat <base_ref> -- <test_paths>` 无删除（plan.md §既有测试变更 所列除外）
 - [ ] 无 `TODO` / `not implemented`
 - [ ] 无调试用 `console.log`
 - [ ] 接缝之外的测试未增加（防止横向切片）
