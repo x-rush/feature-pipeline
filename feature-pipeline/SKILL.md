@@ -51,10 +51,6 @@ If a dispatched skill is not installed, **apply its criteria by hand**, record `
 
 **State file.** Create `features/<slug>/` (add `features/` to the *target* repo's `.gitignore`; un-ignore one feature dir if you want its artifacts in the PR) and copy `templates/pipeline.json`. The state file is authoritative for `stage`/`verdict`; artifacts are evidence; on conflict trust the file and set `state_mismatch: true`. Record the files already dirty at G0 in `dirty_files` — anti-drift rule 4 depends on that list.
 
-```json
-{"slug":"login-throttle","gear":"high","gear_source":"auto","attrs":["cross_module"],"models":{"design":"<host>","code":"<host>","review":"<host>","review_degraded":false},"stage":"G2","verdict":null,"rounds":{"review":0},"risk_ack":null,"missing_skills":[],"state_mismatch":false,"dirty_files":[]}
-```
-
 **Run `node ${SKILL_DIR}/scripts/preflight.mjs` first** and copy `commands`, `base_ref` and `dirty_files` out of its JSON into the state file. Later gates cite those three: without a recorded test command G3 has no evidence to paste, and without `base_ref` G4 has nothing to diff. If no test command is detected, set `degraded_verification: true` — each AC then verifies with a recorded command plus its pasted output; manual is allowed, unrecorded is not.
 
 **Model IDs come from the host, not from this file.** `gears.json` `roles` says what each stage needs (strong reasoning / cheap flat-rate / different family); at G0 read the first existing path in `host_config` (local override first, then the tracked example), take that file's `active` host entry. `${SKILL_DIR}` is the directory holding this SKILL.md — resolve it before testing the paths, so a `cp -R` install and an in-repo checkout both work, and write the resolved ids into `models`. If the host has no second model, say so now, not at G4.
