@@ -12,10 +12,13 @@
   "commands": { "test": null, "lint": null, "build": null },
   "base_ref": "<sha from scripts/preflight.mjs>",
   "degraded_verification": false,
+  "test_paths": [],
+  "spec_approved": false,
   "stage": "G0",
   "verdict": null,
   "rounds": {
-    "review": 0
+    "review": 0,
+    "red": 0
   },
   "risk_ack": null,
   "missing_skills": [],

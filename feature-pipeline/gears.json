@@ -24,7 +24,7 @@
   "pipeline": {
     "state_file": "features/<slug>/.pipeline.json",
     "state_template": "templates/pipeline.json",
-    "state_schema": ["slug", "gear", "gear_source", "attrs", "models", "stage", "verdict", "rounds", "risk_ack", "missing_skills", "state_mismatch", "dirty_files", "commands", "base_ref", "degraded_verification"],
+    "state_schema": ["slug", "gear", "gear_source", "attrs", "models", "stage", "verdict", "rounds", "risk_ack", "missing_skills", "state_mismatch", "dirty_files", "commands", "base_ref", "degraded_verification", "test_paths", "spec_approved"],
     "authority": "stage and verdict live in the state file; artifacts are evidence; on conflict trust the file and set state_mismatch",
     "stages": ["G0", "G1", "G2", "G3", "G4", "done"],
     "review_files": {
