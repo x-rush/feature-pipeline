@@ -1,30 +1,94 @@
 {
-  "_note": "Ready-to-use defaults. The ids below are Easy Code's public catalog, and the same four OpenAI models back every other host here. Copy this to config/host.local.json (git-ignored) when your machine differs — e.g. a different catalog or extra profiles. `active` picks the entry G0 reads.",
+  "_note": "Ready-to-use defaults. Model ids are the host's own catalog; `gear_mode` says whether the three gears differ. Copy this to config/host.local.json (git-ignored) when your machine differs. `active` picks the entry G0 reads. Every role is {low, high, max} so a consumer never has to special-case a plain string.",
   "active": "easycode",
   "hosts": {
     "easycode": {
-      "_note": "Switch models in the host UI; there is no switching API, so a stage change is a manual switch or a new session.",
+      "_note": "Switch models in the host UI; there is no switching API, so a stage change is a manual switch or a new session. Full catalog: 25 models, all three gears distinct.",
+      "gear_mode": "per-gear",
+      "review_degraded": false,
+      "index": {
+        "_note": "AA Intelligence Index v5.0.1 — see docs/HOSTS.md for the full table",
+        "design": {
+          "low": 55,
+          "high": 57,
+          "max": 59
+        },
+        "code": {
+          "low": 29,
+          "high": 32,
+          "max": 32
+        },
+        "review": {
+          "low": 35,
+          "high": 60,
+          "max": 55
+        }
+      },
       "models": {
-        "design": { "low": "gpt-6.1-terra", "high": "gpt-6.1-sol", "max": "claude-opus-5-5" },
-        "code": { "low": "ling-3.1-flash", "high": "deepseek-flash", "max": "deepseek-flash" },
-        "review": { "low": "hy4", "high": "gemini-4-argon", "max": "claude-sonnet-5-5" }
+        "design": {
+          "low": "gpt-6.1-terra",
+          "high": "gpt-6.1-sol",
+          "max": "claude-opus-5-5"
+        },
+        "code": {
+          "low": "ling-3.1-flash",
+          "high": "deepseek-flash",
+          "max": "deepseek-flash"
+        },
+        "review": {
+          "low": "hy4",
+          "high": "gemini-4-argon",
+          "max": "claude-sonnet-5-5"
+        }
       },
       "invocation": {
         "design": "在本宿主 UI 里切到 models.design[gear]",
         "code": "切到 models.code[gear]",
         "review": "新开会话 + 切到 models.review[gear]"
       },
-      "estimate": { "_note": "relative comparison only, not a budget", "low": 20.6, "high": 47.2, "max": 82.1 }
+      "estimate": {
+        "_note": "relative comparison only, not a budget",
+        "low": 20.6,
+        "high": 47.2,
+        "max": 82.1
+      }
     },
     "codex": {
-      "_note": "One config layer per role, selected with --profile. See docs/HOSTS.md for the [agents] table.",
-      "catalog": ["gpt-6-astra", "gpt-6.1-sol", "gpt-6.1-terra", "gpt-6-luna"],
-      "models": {
-        "design": "gpt-6-astra",
-        "code": "gpt-6-luna",
-        "review": "gpt-6.1-sol"
+      "_note": "One config layer per role, selected with --profile. Codex exposes one model family, so the three gears collapse into a single assignment — there is nothing to gain from gear-specific ids.",
+      "gear_mode": "single",
+      "review_degraded": true,
+      "review_degraded_reason": "Every selectable model is OpenAI, so review cannot cross families. Record models.review_degraded=true in .pipeline.json and say so in review.md; never claim a cross-family review.",
+      "index": {
+        "design": null,
+        "code": 55,
+        "review": 57
       },
-      "code_alternatives": ["gpt-6.1-terra"],
+      "catalog": [
+        "gpt-6-astra",
+        "gpt-6.1-sol",
+        "gpt-6.1-terra",
+        "gpt-6-luna"
+      ],
+      "models": {
+        "design": {
+          "low": "gpt-6-astra",
+          "high": "gpt-6-astra",
+          "max": "gpt-6-astra"
+        },
+        "code": {
+          "low": "gpt-6.1-terra",
+          "high": "gpt-6.1-terra",
+          "max": "gpt-6.1-terra"
+        },
+        "review": {
+          "low": "gpt-6.1-sol",
+          "high": "gpt-6.1-sol",
+          "max": "gpt-6.1-sol"
+        }
+      },
+      "code_alternatives": [
+        "gpt-6-luna"
+      ],
       "invocation": {
         "design": "codex --profile design",
         "code": "codex --profile code",
@@ -38,46 +102,150 @@
       },
       "review_model": "gpt-6.1-sol",
       "agents": {
-        "coder": { "config_file": "~/.codex/agents/coder.toml", "model": "gpt-6-luna" }
+        "coder": {
+          "config_file": "~/.codex/agents/coder.toml",
+          "model": "gpt-6.1-terra"
+        }
       }
     },
     "claude-code": {
-      "_note": "Skill dir is ~/.claude/skills. Fill in the aliases or full ids your plan exposes.",
-      "models": { "design": "<design-model>", "code": "<cheap-model>", "review": "<review-model>" },
+      "_note": "Skill dir is ~/.claude/skills. Anthropic-only catalog, so the gears collapse. design 59 > review 55 > code 36: the ordering the pipeline wants, per stage.",
+      "gear_mode": "single",
+      "review_degraded": true,
+      "review_degraded_reason": "Every selectable model is Anthropic, so review cannot cross families. Record models.review_degraded=true in .pipeline.json.",
+      "index": {
+        "design": 59,
+        "code": 36,
+        "review": 55
+      },
+      "models": {
+        "design": {
+          "low": "claude-opus-5-5",
+          "high": "claude-opus-5-5",
+          "max": "claude-opus-5-5"
+        },
+        "code": {
+          "low": "claude-haiku-5-5",
+          "high": "claude-haiku-5-5",
+          "max": "claude-haiku-5-5"
+        },
+        "review": {
+          "low": "claude-sonnet-5-5",
+          "high": "claude-sonnet-5-5",
+          "max": "claude-sonnet-5-5"
+        }
+      },
       "invocation": {
-        "design": "claude --model <design-model>",
-        "code": "claude --model <cheap-model>",
-        "review": "新会话：claude --model <review-model>"
+        "design": "claude --model claude-opus-5-5",
+        "code": "claude --model claude-haiku-5-5",
+        "review": "新会话：claude --model claude-sonnet-5-5"
       },
       "subagent_example": {
         "file": ".claude/agents/reviewer.md",
-        "frontmatter": { "description": "只读 diff 与 spec，逐条 AC 找反例", "model": "<review-model>" }
+        "frontmatter": {
+          "description": "只读 diff 与 spec，逐条 AC 找反例",
+          "model": "claude-sonnet-5-5"
+        }
       }
     },
     "opencode": {
-      "_note": "Reads .opencode/skills plus compat .agents/skills. Roles map onto built-ins plan/build + a reviewer subagent.",
-      "models": { "design": "<provider>/<design-model>#high", "code": "<provider>/<cheap-model>", "review": "<provider>/<review-model>#high" },
+      "_note": "Model-agnostic: pulls every connected provider's models from models.dev (`opencode models` lists them). Same three-gear shape as Easy Code; ids are provider-prefixed.",
+      "gear_mode": "per-gear",
+      "review_degraded": false,
+      "index": {
+        "design": {
+          "low": 55,
+          "high": 57,
+          "max": 59
+        },
+        "code": {
+          "low": 32,
+          "high": 32,
+          "max": 32
+        },
+        "review": {
+          "low": 36,
+          "high": 60,
+          "max": 55
+        }
+      },
+      "models": {
+        "design": {
+          "low": "openai/gpt-6.1-terra",
+          "high": "openai/gpt-6.1-sol",
+          "max": "anthropic/claude-opus-5-5"
+        },
+        "code": {
+          "low": "deepseek/deepseek-flash",
+          "high": "deepseek/deepseek-flash",
+          "max": "deepseek/deepseek-flash"
+        },
+        "review": {
+          "low": "anthropic/claude-haiku-5-5",
+          "high": "google/gemini-4-argon",
+          "max": "anthropic/claude-sonnet-5-5"
+        }
+      },
+      "code_alternatives": [
+        "ling-3.1-flash"
+      ],
       "invocation": {
         "design": "opencode 里用 plan agent（配 design 模型）",
-        "code": "opencode 里用 build agent（配 cheap 模型）",
+        "code": "opencode 里用 build agent（配 code 模型）",
         "review": "起 reviewer 子代理（只读权限）"
       },
       "agent_config": "~/.config/opencode/opencode.json → agents.reviewer.model"
     },
     "cursor": {
-      "_note": "Reads .agents/skills natively. Model can change mid-conversation; G4 opens a new chat.",
-      "models": { "design": "<design-model>", "code": "<cheap-model>", "review": "<review-model>" },
+      "_note": "Reads .agents/skills natively. Model picker switches mid-conversation, so all three gears fit one chat until G4, which needs a new chat. Third-party frontier models need a paid plan; `opencode models` has no equivalent here — check the picker.",
+      "gear_mode": "per-gear",
+      "review_degraded": false,
+      "index": {
+        "design": {
+          "low": 55,
+          "high": 57,
+          "max": 59
+        },
+        "code": {
+          "low": 36,
+          "high": 36,
+          "max": 36
+        },
+        "review": {
+          "low": 55,
+          "high": 60,
+          "max": 60
+        }
+      },
+      "models": {
+        "design": {
+          "low": "openai/gpt-6.1-terra",
+          "high": "openai/gpt-6.1-sol",
+          "max": "anthropic/claude-opus-5-5"
+        },
+        "code": {
+          "low": "anthropic/claude-haiku-5-5",
+          "high": "anthropic/claude-haiku-5-5",
+          "max": "anthropic/claude-haiku-5-5"
+        },
+        "review": {
+          "low": "openai/gpt-6.1-terra",
+          "high": "google/gemini-4-argon",
+          "max": "google/gemini-4-argon"
+        }
+      },
       "invocation": {
-        "design": "模型选择器选 design 模型",
-        "code": "切到 cheap 模型",
-        "review": "新开对话 + 选 review 模型"
+        "design": "模型选择器选 models.design[gear]",
+        "code": "切到 models.code[gear]",
+        "review": "新开对话 + 选 models.review[gear]"
       }
     }
   },
-  "review_degraded": false,
   "rules": [
     "At G0 write the resolved ids into .pipeline.json.models — the state file, not this template, is what a later session reads.",
-    "If review resolves to the same model as code, set review_degraded: true and say so; never claim a cross-model review you did not run.",
+    "If review resolves to the same model as code, or the host offers one family only, set review_degraded: true and say so; never claim a cross-model review you did not run.",
+    "code must have no highVolumeThreshold when the host bills per request with a long-context surcharge; that is an Easy Code credit rule, not a universal one.",
+    "design[gear] must be the strongest id the host can actually select — cap it at review only if the catalog forces it, and record that.",
     "If the host cannot bind a model per stage, the design->code->review handoffs stay manual session switches; that is a host limitation, not a pipeline failure."
   ]
 }

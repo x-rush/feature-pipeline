@@ -14,9 +14,41 @@
 
 **共同铁律**：design 与 code 不同模型；review 与 code 不同且更强。型号在 `feature-pipeline/config/host.example.json`（已跟踪、开箱可用）；本机差异写 `feature-pipeline/config/host.local.json`（未跟踪），G0 优先读它、没有就回退到 example。
 
+## AA 指数（口径：AA Intelligence Index v5.0.1，本目录 25 个型号）
+
+只列配置里用到的型号；「阈值」是 Easy Code 的分档计费，**非 Easy Code 宿主不适用**。
+
+| 模型 | AA | 积分/次 | 阈值 | 用途 |
+|---|---|---|---|---|
+| `claude-fable-5-1` | **65** | 24 | 无 | 目录内最强，但贵 2.6× opus |
+| `gemini-4-argon` | **60** | 3.7 | 无 | 第二强，价格只有 fable 的 1/6 |
+| `claude-opus-5-5` | 59 | 9.2 | 无 | design.max 现值 |
+| `gpt-6.1-sol` | 57 | 4.8 | 272k → 8 | Codex 评审 |
+| `gpt-6.1-terra` | 55 | 2.3 | 272k → 4 | design.low / Codex 编码 |
+| `claude-sonnet-5-5` | 55 | 4.8 | 无 | review.max |
+| `claude-haiku-5-5` | 36 | 0.24 | **100k → 1.2** | 阈值断崖最陡（5×），不适合长评审 |
+| `hy4` | 35 | 1.15 | 无 | 恒定价，review.low |
+| `deepseek-flash` | 32 | 0.47 | 无 | code.high/max 默认 |
+| `gemini-3.8-flash` | 30 | 1.5 | 无 | — |
+| `ling-3.1-flash` | **29** | **0.12** | 无 | 目录内最便宜，code.low |
+| `gpt-6-luna` | 27 | 0.24 | 272k → 0.42 | 目录内最弱 |
+| `gpt-6-astra` | 未上榜 | — | — | 榜单没有此型号，能力未知 |
+
+> 读这张表的两个坑：① **价格不是能力**——`ling` 0.12 分但 AA 29，`argon` 3.7 分但 AA 60；② **阈值不是单价**——`haiku` 标 0.24，长会话实际 1.2。
+
 出处：[Codex skills](https://developers.openai.com/codex/skills)、[Codex config reference（官方文档镜像）](https://github.com/crasuna/openai-dev-docs-cn-mirror/blob/main/sources/en/codex/config-reference.md)、[Claude Code sub-agents](https://code.claude.com/docs/en/sub-agents)、[opencode skills](https://opencode.ai/docs/skills)、[opencode agents](https://opencode.ai/docs/agents)、[Cursor skills](https://prod.cursor.com/help/customization/skills)、[Cursor 模型切换](https://cursor.com/docs/agent/prompting)。
 
 ## 1. Codex
+
+**本仓默认：单档**——Codex 能选的型号全是 OpenAI，三档填同一套没有收益。
+
+| 角色 | 模型 | AA | 说明 |
+|---|---|---|---|
+| design | `gpt-6-astra` | 未上榜 | 榜单没有此型号；若实际弱于 sol，设计会弱于评审，需实测一次 |
+| code | `gpt-6.1-terra` | 55 | 比 `gpt-6-luna`（27）强得多；luna 留在 `code_alternatives` 只作降级 |
+| review | `gpt-6.1-sol` | 57 | 强于 code ✓ |
+
+`review_degraded: true` 是**结构性**的：同族无法跨族评审。G0 必须把 `models.review_degraded=true` 写进 `.pipeline.json`，`review.md` 头部如实标明，不得声称做过跨模型评审。
 
 **技能目录**：Codex 从当前目录一路向上扫到仓库根，收集每一层的 `.agents/skills`；再加用户级 `~/.agents/skills`（注意 `~/.codex/skills` 与它是同一位置）、`/etc/codex/skills` 和内置。
 
@@ -85,6 +117,16 @@ review_model = "<review-model>"
 
 ## 2. Claude Code
 
+**本仓默认：单档**——Anthropic-only 目录，三档填同一套。
+
+| 角色 | 模型 | AA | 说明 |
+|---|---|---|---|
+| design | `claude-opus-5-5` | 59 | 目录内最强 |
+| code | `claude-haiku-5-5` | 36 | 机械翻译够用，且便宜 |
+| review | `claude-sonnet-5-5` | 55 | 59 > 55 > 36，三档关系正好符合流水线 |
+
+`review_degraded: true`：同族，无法跨族评审，按上节同样处理。
+
 **技能目录**：`~/.claude/skills/<name>/SKILL.md`（个人）、`.claude/skills/`（项目），插件与企业管理级同级。
 
 ```bash
@@ -129,7 +171,16 @@ model: <review-model>
 }
 ```
 
-三档映射：G1/G2 用 `plan`（配 design 模型）→ G3 用 `build`（配 cheap 模型）→ G4 起 `reviewer`（配 review 模型）。
+三档映射：G1/G2 用 `plan` → G3 用 `build` → G4 起 `reviewer` 子代理。
+
+| 角色 | low | high | max | AA |
+|---|---|---|---|---|
+| design | `openai/gpt-6.1-terra` | `openai/gpt-6.1-sol` | `anthropic/claude-opus-5-5` | 55 / 57 / 59 |
+| code | `deepseek/deepseek-flash` | 同左 | 同左 | 32 |
+| review | `anthropic/claude-haiku-5-5` | `google/gemini-4-argon` | `anthropic/claude-sonnet-5-5` | 36 / 60 / 55 |
+
+opencode 是 provider-agnostic，所以三档可以完整展开——**形状和 Easy Code 一致**。code 三档都用 `deepseek-flash` 是因为它的 provider 前缀最稳；若你的供应商带 `ling-3.1-flash`（29 / 0.12），可照 Easy Code 的做法换到 low 上换 74% 的成本。
+
 
 ## 4. Cursor
 
@@ -139,7 +190,16 @@ CLI 装到 `.agents/skills` → **Cursor 原生读**，不用软链。
 
 **换模型**：官方文档写明可用模型选择器切换，`Cmd/Ctrl + /` 循环，**"可以在对话中途切换"**，变更对后续生效；每个 mode（Ask/Agent）还能各设默认模型。
 
-三档映射：同一对话里先选 design 模型跑 G1/G2 → 切 cheap 模型跑 G3 → **开新对话**选 review 模型跑 G4（跨对话=天然 fresh-session，也满足"评审换模型"）。
+三档映射：同一对话里 G1/G2 选 design → G3 切 code → **开新对话**跑 G4（跨对话 = 天然 fresh-session）。
+
+| 角色 | low | high | max | AA |
+|---|---|---|---|---|
+| design | `openai/gpt-6.1-terra` | `openai/gpt-6.1-sol` | `anthropic/claude-opus-5-5` | 55 / 57 / 59 |
+| code | `anthropic/claude-haiku-5-5` | 同左 | 同左 | 36 |
+| review | `openai/gpt-6.1-terra` | `google/gemini-4-argon` | `google/gemini-4-argon` | 55 / 60 / 60 |
+
+Cursor 只稳定提供 Anthropic / OpenAI / Google / xAI 与自家 Composer，所以 code 选 `haiku`（36，便宜且够用），review 就必须避开门族换成 terra / argon。**第三方前沿模型需要付费档**；`opencode models` 没有对应命令，只能在选择器里确认。
+
 
 ## 5. Easy Code
 
@@ -197,11 +257,15 @@ cp -R /tmp/sp/skills/* ~/.easycode-user/skills/
 
 ## 6. 三档落到五个 agent
 
-| 阶段 | 要什么 | Easy Code | Codex | Claude Code | opencode | Cursor |
-|---|---|---|---|---|---|---|
-| G1/G2 设计 | 强推理 | UI 切 design | `--profile design` | `--model <design>` | `plan` agent | 选择器 |
-| G3 编码 | 廉价、长上下文不涨价 | UI 切 code | `--profile code` | `/model <cheap>` | `build` agent | 对话中途切 |
-| G4 评审 | 异族且 ≥ code | 新会话 + UI 切 review | `--profile review` | reviewer 子代理 | `reviewer` 子代理 | 新对话 + review 模型 |
+| | Easy Code | Codex | Claude Code | opencode | Cursor |
+|---|---|---|---|---|---|
+| 分档方式 | **三档各自不同** | **单档**（OpenAI-only） | **单档**（Anthropic-only） | 三档各自不同 | 三档各自不同 |
+| G1/G2 设计 | UI 切 `design[gear]` | `--profile design` | `claude --model opus` | `plan` agent | 选择器 |
+| G3 编码 | UI 切 `code[gear]` | `--profile code` | `/model haiku` | `build` agent | 对话中途切 |
+| G4 评审 | 新会话 + `review[gear]` | `--profile review` | reviewer 子代理 | `reviewer` 子代理 | 新对话 |
+| 跨族评审 | ✅ | ❌ `review_degraded` | ❌ `review_degraded` | ✅ | ✅ |
+
+> Codex 与 Claude Code 被判 `review_degraded` 不是配置没做好，而是**目录里只有一个家族**——跨族评审在这两个宿主上物理上做不到。承认它，比假装做了跨模型评审诚实。
 
 ## 7. 自查
 
