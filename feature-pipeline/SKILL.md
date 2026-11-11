@@ -59,6 +59,8 @@ If a dispatched skill is not installed, **apply its criteria by hand**, record `
 
 **Gears only go up mid-flight**: upgrading adds the missing fields and tests but never re-runs a passed gate — except an upgrade to max, which re-runs G2 with the max design model. Downgrading re-runs G0 with `gear_source:"downgrade"` — a re-baseline, not a mid-flight downgrade.
 
+**A role change is a stop, not a hint.** G0->G1 switches to `models.design[gear]`, G2->G3 to `models.code`, G3->G4 to `models.review` in a new session. Name the target id, **wait for the user to confirm it is switched, then start** — never begin the stage on whatever model happens to be active. A stage that opens on the wrong model is a deviation: say so and record it. **Next** (G0): `.pipeline.json` with attributes and commands / G1 / **the user switches to `models.design[gear]` before anything else** / opening line "write spec.md from templates/spec.md".
+
 ## Three mechanisms used at every gate
 
 **1. Exit check by citation, not by checkmark.** Every item must name a location, never claim "done":
@@ -73,7 +75,7 @@ Exit check
 
 **No location, no completion.** A citation is checkable in 30 seconds; a claim is not.
 
-**2. `Next` block, four parts.** Any reply that stops on a gate boundary ends with: **artifact / next stage / model / opening line**.
+**2. `Next` block, four parts.** Any reply that stops on a gate boundary ends with: **artifact / next stage / model / opening line**. The model part is an instruction to switch, not a note about what you used.
 
 **3. Templates are the criteria.** Open the template for the stage and fill it in. Missing fields mean the gate is not passed. Never write the format from memory.
 

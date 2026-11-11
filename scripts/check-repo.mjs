@@ -95,6 +95,19 @@ if (redLine) {
   if (gears.max?.blocker_threshold !== hard) fail(`SKILL.md says ${hard} red rounds in max but max.blocker_threshold is ${gears.max?.blocker_threshold}`);
 } else note('SKILL.md no longer states the blocked threshold in prose');
 
+// 5d. every gate must end with a Next block. G0 silently lacked one, so the
+// gear was picked, the model was only *recommended*, and the next stage opened
+// on whatever model happened to be active.
+const gateChunks = skill.split(/^## (G\d)[^\n]*$/m).slice(1);
+const gates = [];
+for (let i = 0; i < gateChunks.length; i += 2) gates.push({ id: gateChunks[i], body: gateChunks[i + 1] ?? '' });
+if (gates.length < 4) {
+  fail(`SKILL.md has only ${gates.length} "## G<n>" gate sections; expected at least 4`);
+}
+for (const { id, body } of gates) {
+  if (!/\*\*Next\*\*/.test(body)) fail(`gate ${id} has no **Next** block (artifact / next stage / model / opening line)`);
+}
+
 // 6. keys other scripts rely on
 const requiredKeys = ['entry', 'gear_aliases', 'override_policy', 'pipeline', 'roles', 'attributes', 'skills', 'conditional', 'dispatch_rules', 'constants', 'host_config'];
 for (const k of requiredKeys) {
