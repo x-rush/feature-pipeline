@@ -1,7 +1,20 @@
 {
   "_note": "Gears, dispatch tables, and overrides. Change gears here, never in SKILL.md or the READMEs.",
   "entry": {
-    "max_triggers": ["数据迁移", "数据删除", "鉴权", "支付", "并发", "跨服务", "migration", "delete data", "auth", "payment", "concurrency", "cross-service"],
+    "max_triggers": [
+      "数据迁移",
+      "数据删除",
+      "鉴权",
+      "支付",
+      "并发",
+      "跨服务",
+      "migration",
+      "delete data",
+      "auth",
+      "payment",
+      "concurrency",
+      "cross-service"
+    ],
     "high_min_files": 4,
     "high_max_files": 5,
     "multi_module_min_files": 4,
@@ -10,9 +23,33 @@
     "low_requires_single_module": true
   },
   "gear_aliases": {
-    "low": ["low", "省钱", "便宜", "最省", "最小成本", "只求能跑", "cheapest", "fastest"],
-    "high": ["high", "主流", "标准", "正常", "默认", "standard", "be careful"],
-    "max": ["max", "高风险", "最稳", "别出错", "事故级", "production-critical"]
+    "low": [
+      "low",
+      "省钱",
+      "便宜",
+      "最省",
+      "最小成本",
+      "只求能跑",
+      "cheapest",
+      "fastest"
+    ],
+    "high": [
+      "high",
+      "主流",
+      "标准",
+      "正常",
+      "默认",
+      "standard",
+      "be careful"
+    ],
+    "max": [
+      "max",
+      "高风险",
+      "最稳",
+      "别出错",
+      "事故级",
+      "production-critical"
+    ]
   },
   "override_policy": {
     "allow_user_override": true,
@@ -24,9 +61,34 @@
   "pipeline": {
     "state_file": "features/<slug>/.pipeline.json",
     "state_template": "templates/pipeline.json",
-    "state_schema": ["slug", "gear", "gear_source", "attrs", "models", "stage", "verdict", "rounds", "risk_ack", "missing_skills", "state_mismatch", "dirty_files", "commands", "base_ref", "degraded_verification", "test_paths", "spec_approved"],
+    "state_schema": [
+      "slug",
+      "gear",
+      "gear_source",
+      "attrs",
+      "models",
+      "stage",
+      "verdict",
+      "rounds",
+      "risk_ack",
+      "missing_skills",
+      "state_mismatch",
+      "dirty_files",
+      "commands",
+      "base_ref",
+      "degraded_verification",
+      "test_paths",
+      "spec_approved"
+    ],
     "authority": "stage and verdict live in the state file; artifacts are evidence; on conflict trust the file and set state_mismatch",
-    "stages": ["G0", "G1", "G2", "G3", "G4", "done"],
+    "stages": [
+      "G0",
+      "G1",
+      "G2",
+      "G3",
+      "G4",
+      "done"
+    ],
     "review_files": {
       "1": "review.md",
       "2": "review-r2.md",
@@ -39,7 +101,11 @@
       "rework_cap": 3,
       "rework_cap_action": "escalate to G1 on the 3rd rework"
     },
-    "ac_verdicts": ["PASS", "FAIL", "UNVERIFIED"],
+    "ac_verdicts": [
+      "PASS",
+      "FAIL",
+      "UNVERIFIED"
+    ],
     "empty_verdict_means": "unchecked; UNVERIFIED is never PASS"
   },
   "layers": {
@@ -68,74 +134,239 @@
   },
   "skills": {
     "low": {
-      "g1": ["brainstorming"],
-      "g2": ["writing-plans"],
-      "g3": ["ponytail", "tdd", "verification-before-completion"],
-      "g4": ["code-review"],
+      "g1": [
+        "brainstorming"
+      ],
+      "g2": [
+        "writing-plans"
+      ],
+      "g3": [
+        "ponytail",
+        "tdd",
+        "verification-before-completion"
+      ],
+      "g4": [
+        "code-review"
+      ],
       "finish": [],
       "notes": "G1+G2 merged in one pass; tdd supplies criteria only, no full loop; ponytail capped at full"
     },
     "high": {
-      "g1": ["brainstorming", "graphify"],
-      "g2": ["writing-plans", "graphify", "codebase-design"],
-      "g3": ["tdd", "test-driven-development", "executing-plans", "ponytail", "systematic-debugging", "verification-before-completion"],
-      "g4": ["code-review", "ponytail-review", "receiving-code-review"],
-      "finish": ["finishing-a-development-branch", "pr"],
+      "g1": [
+        "brainstorming",
+        "graphify"
+      ],
+      "g2": [
+        "writing-plans",
+        "graphify",
+        "codebase-design"
+      ],
+      "g3": [
+        "tdd",
+        "test-driven-development",
+        "executing-plans",
+        "ponytail",
+        "systematic-debugging",
+        "verification-before-completion"
+      ],
+      "g4": [
+        "code-review",
+        "ponytail-review",
+        "receiving-code-review"
+      ],
+      "finish": [
+        "finishing-a-development-branch",
+        "pr"
+      ],
       "notes": "tdd gives seams and criteria, test-driven-development runs the loop; G4 must be a fresh session"
     },
     "max": {
-      "g1": ["brainstorming", "graphify"],
-      "g2": ["writing-plans", "graphify", "codebase-design", "grill-with-docs"],
-      "g3": ["tdd", "test-driven-development", "executing-plans", "subagent-driven-development", "ponytail", "systematic-debugging", "using-git-worktrees", "verification-before-completion"],
-      "g4": ["code-review", "ponytail-review", "receiving-code-review"],
-      "finish": ["finishing-a-development-branch", "pr"],
+      "g1": [
+        "brainstorming",
+        "graphify"
+      ],
+      "g2": [
+        "writing-plans",
+        "graphify",
+        "codebase-design",
+        "grill-with-docs"
+      ],
+      "g3": [
+        "tdd",
+        "test-driven-development",
+        "executing-plans",
+        "subagent-driven-development",
+        "ponytail",
+        "systematic-debugging",
+        "using-git-worktrees",
+        "verification-before-completion"
+      ],
+      "g4": [
+        "code-review",
+        "ponytail-review",
+        "receiving-code-review"
+      ],
+      "finish": [
+        "finishing-a-development-branch",
+        "pr"
+      ],
       "notes": "worktree isolation; G4 two rounds (round 2 adversarial only); diagnosing-bugs reserved for BLOCKED"
     }
   },
   "conditional": {
-    "ui": { "g1": ["ui-ux-pro-max"], "g3": ["ui-styling"], "rule": "AC must state a page-level action" },
-    "no_tests": { "g3": ["test-driven-development"], "rule": "first plan task is 'add tests'" },
-    "cross_module": { "g1": ["graphify"], "g2": ["graphify"], "g3": ["graphify"], "rule": "plan lists callers" },
-    "parallel": { "g3": ["dispatching-parallel-agents"], "rule": "one module per subagent" },
-    "legacy": { "g3": ["graphify", "systematic-debugging"], "rule": "draw the call chain first" },
-    "terminology": { "g1": ["domain-modeling"], "rule": "glossary with definition and banned synonyms" },
-    "spike": { "g2": ["prototype"], "rule": "throwaway prototype, write the answer into plan" },
-    "hard_bug": { "g3": ["diagnosing-bugs"], "rule": "escalate after 3 rounds of systematic-debugging" },
-    "rework": { "g3": ["receiving-code-review"], "rule": "verify each finding, never batch-apply" }
+    "ui": {
+      "g1": [
+        "ui-ux-pro-max"
+      ],
+      "g3": [
+        "ui-styling"
+      ],
+      "rule": "AC must state a page-level action"
+    },
+    "no_tests": {
+      "g3": [
+        "test-driven-development"
+      ],
+      "rule": "first plan task is 'add tests'"
+    },
+    "cross_module": {
+      "g1": [
+        "graphify"
+      ],
+      "g2": [
+        "graphify"
+      ],
+      "g3": [
+        "graphify"
+      ],
+      "rule": "plan lists callers"
+    },
+    "parallel": {
+      "g3": [
+        "dispatching-parallel-agents"
+      ],
+      "rule": "one module per subagent"
+    },
+    "legacy": {
+      "g3": [
+        "graphify",
+        "systematic-debugging"
+      ],
+      "rule": "draw the call chain first"
+    },
+    "terminology": {
+      "g1": [
+        "domain-modeling"
+      ],
+      "rule": "glossary with definition and banned synonyms"
+    },
+    "spike": {
+      "g2": [
+        "prototype"
+      ],
+      "rule": "throwaway prototype, write the answer into plan"
+    },
+    "hard_bug": {
+      "g3": [
+        "diagnosing-bugs"
+      ],
+      "rule": "escalate after 3 rounds of systematic-debugging"
+    },
+    "rework": {
+      "g3": [
+        "receiving-code-review"
+      ],
+      "rule": "verify each finding, never batch-apply"
+    }
   },
   "dispatch_rules": {
     "attributes_add_only": true,
     "attributes_set_at_g0": "initial set only; additions allowed at any gate",
     "gear_adds_safeguards_only": true,
-    "never_drop_baseline": ["test-file-readonly", "verification-before-completion", "code-review"],
-    "no_dispatch": ["ask-matt", "using-superpowers", "to-tickets", "triage", "wayfinder", "implement", "implement-spec"],
+    "never_drop_baseline": [
+      "test-file-readonly",
+      "verification-before-completion",
+      "code-review"
+    ],
+    "no_dispatch": [
+      "ask-matt",
+      "using-superpowers",
+      "to-tickets",
+      "triage",
+      "wayfinder",
+      "implement",
+      "implement-spec"
+    ],
     "escalation_rule": "coding-skill-arbiter may only send tasks that G0 accepts: max_triggers, public interface change, untested target module, >=4 files, or an explicit user request"
   },
   "low": {
     "merge_g1g2": true,
-    "plan_fields": ["files", "signatures", "tests", "seams"],
+    "plan_fields": [
+      "files",
+      "signatures",
+      "tests",
+      "seams",
+      "decisions"
+    ],
     "review_rounds": 1,
     "review_session": "fresh",
-    "review_materials": ["diff", "spec"],
+    "review_materials": [
+      "diff",
+      "spec"
+    ],
     "blocker_threshold": 3
   },
   "high": {
     "merge_g1g2": false,
-    "plan_fields": ["files", "signatures", "tests", "seams", "errors", "reuse"],
+    "plan_fields": [
+      "files",
+      "signatures",
+      "tests",
+      "seams",
+      "decisions",
+      "errors",
+      "reuse"
+    ],
     "review_rounds": 1,
     "review_session": "fresh",
-    "review_materials": ["diff", "spec", "plan", "blockers"],
+    "review_materials": [
+      "diff",
+      "spec",
+      "plan",
+      "blockers"
+    ],
     "blocker_threshold": 3
   },
   "max": {
     "merge_g1g2": false,
-    "plan_fields": ["files", "signatures", "tests", "seams", "errors", "reuse", "dataflow", "concurrency", "rollback"],
+    "plan_fields": [
+      "files",
+      "signatures",
+      "tests",
+      "seams",
+      "decisions",
+      "errors",
+      "reuse",
+      "dataflow",
+      "concurrency",
+      "rollback"
+    ],
     "review_rounds": 2,
     "review_session": "fresh",
-    "review_materials": ["diff", "spec", "plan", "blockers", "history", "blast_radius"],
+    "review_materials": [
+      "diff",
+      "spec",
+      "plan",
+      "blockers",
+      "history",
+      "blast_radius"
+    ],
     "blocker_threshold": 1
   },
-  "host_config": ["${SKILL_DIR}/config/host.local.json", "${SKILL_DIR}/config/host.example.json"],
+  "host_config": [
+    "${SKILL_DIR}/config/host.local.json",
+    "${SKILL_DIR}/config/host.example.json"
+  ],
   "host_config_rule": "Read the first path that exists, then take its hosts[active] entry. ${SKILL_DIR} is the directory holding this SKILL.md, so the config travels with the skill instead of depending on the caller's cwd. The first entry is an optional git-ignored override; the last is tracked, so a fresh clone always has a working config.",
   "roles": {
     "design": "strongest reasoning: writes interfaces, seams and failure paths in one pass",

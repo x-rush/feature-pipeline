@@ -59,11 +59,11 @@ If a dispatched skill is not installed, **apply its criteria by hand**, record `
 
 **Gears only go up mid-flight**: upgrading adds the missing fields and tests but never re-runs a passed gate — except an upgrade to max, which re-runs G2 with the max design model. Downgrading re-runs G0 with `gear_source:"downgrade"` — a re-baseline, not a mid-flight downgrade.
 
-**A role change is a stop, not a hint.** G0->G1 switches to `models.design[gear]`, G2->G3 to `models.code`, G3->G4 to `models.review` in a new session. Name the target id, **wait for the user to confirm it is switched, then start** — never begin the stage on whatever model happens to be active. A stage that opens on the wrong model is a deviation: say so and record it. **Next** (G0): `.pipeline.json` with attributes and commands / G1 / **the user switches to `models.design[gear]` before anything else** / opening line "write spec.md from templates/spec.md".
+**A role change is a stop, not a hint.** G0->G1 switches to `models.design[gear]`, G2->G3 to `models.code`, G3->G4 to `models.review` in a new session. Name the target id inside that gate's `Next` (do not open a separate round-trip for it), **wait for the user to confirm it is switched, then start** — never begin the stage on whatever model happens to be active. A stage that opens on the wrong model is a deviation: say so and record it. **Next** (G0): `.pipeline.json` with attributes and commands / G1 / **the user switches to `models.design[gear]` before anything else** / opening line "write spec.md from templates/spec.md".
 
 ## Three mechanisms used at every gate
 
-**1. Exit check by citation, not by checkmark.** Every item must name a location, never claim "done":
+**1. Exit check by citation, not by checkmark.** Every item must name a location, never claim "done" — no location, no completion; a citation is checkable in 30 seconds, a claim is not:
 
 ```
 Exit check
@@ -73,11 +73,11 @@ Exit check
 - Seam = tests/order.test.ts createOrder(), see plan.md §Seam
 ```
 
-**No location, no completion.** A citation is checkable in 30 seconds; a claim is not.
-
-**2. `Next` block, four parts.** Any reply that stops on a gate boundary ends with: **artifact / next stage / model / opening line**. The model part is an instruction to switch, not a note about what you used.
+**2. `Next` block, four parts.** Any reply that stops on a gate boundary ends with: **artifact / next stage / model / opening line**. The model part is an instruction to switch, not a note about what you used. **Only at a gate boundary**: inside a gate keep working — no per-task report, no per-task question.
 
 **3. Templates are the criteria.** Open the template for the stage and fill it in. Missing fields mean the gate is not passed. Never write the format from memory.
+
+**4. Only three things are the user's to decide.** Ask when a choice is **irreversible, costs money, or changes what was promised outside** — and ask all of them **once, in one batch**, never one per task. What the spec already answers is not a question; what is engineering (table shape, cache, SDK, module layout) the plan decides — pick one and say which. **A reversible local action is not a decision**: do it and report it.
 
 ## Stage tracking
 Read the disk at the start — never rely on memory:
@@ -99,7 +99,7 @@ Read the disk at the start — never rely on memory:
 
 **Criteria**: every change traces to an `ACn`; **test seam chosen first — one layer, ideally one seam** (`codebase-design` supplies the deep-module / interface / seam vocabulary); every task has a test; no unapproved dependency; **no** "could consider", "maybe", "similar to before"; no task depends on an open question in spec.md; **re-check the gear against the plan's file list** with the G0 table and upgrade if it now says higher.
 
-**Four-question self-check** (answer without writing code): which files / which method / which test proves it / **is there anything a human must decide**. The fourth answer must be "no".
+**Four-question self-check** (answer without writing code): which files / which method / which test proves it / **is there anything a human must decide**. The fourth answer is "no", or the open ones go to plan.md §待用户裁决 and are asked **once**, before G2 passes.
 
 **Next**: `plan.md` / G3 / switch to `models.code` (a flat-rate coding model may stay in this session) / opening line "read spec.md and plan.md, implement per plan".
 
@@ -109,7 +109,7 @@ Read the disk at the start — never rely on memory:
 
 **Criteria**: paste the full test output (failures + exit code); every AC marked PASS/FAIL/UNVERIFIED; `git diff --numstat <base_ref> -- <test_paths>` shows zero deletions outside plan.md §既有测试变更 (new test files are additions, which are allowed); no `TODO` / `not implemented` / debug logging; no tests added outside the agreed seam.
 
-**Five anti-drift rules**: (1) one commit per task; (2) open each turn with `current T3 (3/8)`; (3) every 5 turns print `plan 3/8, AC 2/5`; (4) touched a file outside the plan -> restore it **only when that file was clean at G0** (`git restore <file>`); if it was already dirty at G0, stop and ask — never destroy unrecorded work; (5) tests shrunk or assertions edited -> automatic fail.
+**Five anti-drift rules**: (1) one commit per task; (2) open each turn with `current T3 (3/8)`; (3) every 5 turns print `plan 3/8, AC 2/5`; (4) touched a file outside the plan -> restore it **only when that file was clean at G0** (`git restore <file>`); if it was already dirty at G0, stop and ask — never destroy unrecorded work; (5) tests shrunk or assertions edited -> automatic fail; (6) run the task list through without stopping — no per-task report, no per-task question; stop only on a BLOCKED condition or when every task is done.
 
 **Next**: `evidence.md` / G4 (**must be a fresh session**) / switch to `models.review` / opening line "review features/<slug>/: run `git diff <base_ref>...HEAD`, judge each AC in spec.md".
 

@@ -51,6 +51,19 @@ for (const r of new Set(refs)) {
   if (!existsSync(join(templatesDir, r))) fail(`SKILL.md references templates/${r}, which does not exist`);
 }
 
+// 3b. every plan template carries the §待用户裁决 table. The pipeline kept
+// interrupting the user after the design was finished; this table is the one
+// place a human decision may be raised, asked once at G2.
+for (const g of ['low', 'high', 'max']) {
+  const f = join(templatesDir, `plan-${g}.md`);
+  if (existsSync(f) && !readFileSync(f, 'utf8').includes('## 待用户裁决')) {
+    fail(`templates/plan-${g}.md has no "## 待用户裁决" section (the one place a human decision may be raised)`);
+  }
+  if (!(gears[g]?.plan_fields ?? []).includes('decisions')) {
+    fail(`gears.json ${g}.plan_fields is missing "decisions"`);
+  }
+}
+
 // 4. state schema listed in gears must match the state template
 const tplPath = join(templatesDir, 'pipeline.json');
 if (existsSync(tplPath)) {
