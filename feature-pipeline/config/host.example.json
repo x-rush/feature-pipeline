@@ -6,15 +6,15 @@
       "_note": "Switch models in the host UI; there is no switching API, so a stage change is a manual switch or a new session.",
       "models": {
         "design": { "low": "gpt-6.1-terra", "high": "gpt-6.1-sol", "max": "claude-opus-5-5" },
-        "code": "deepseek-flash",
-        "review": { "low": "claude-haiku-5-5", "high": "gemini-4-argon", "max": "claude-sonnet-5-5" }
+        "code": { "low": "ling-3.1-flash", "high": "deepseek-flash", "max": "deepseek-flash" },
+        "review": { "low": "hy4", "high": "gemini-4-argon", "max": "claude-sonnet-5-5" }
       },
       "invocation": {
         "design": "在本宿主 UI 里切到 models.design[gear]",
-        "code": "切到 models.code",
+        "code": "切到 models.code[gear]",
         "review": "新开会话 + 切到 models.review[gear]"
       },
-      "estimate": { "_note": "relative comparison only, not a budget", "low": 26.8, "high": 47.2, "max": 82.1 }
+      "estimate": { "_note": "relative comparison only, not a budget", "low": 20.6, "high": 47.2, "max": 82.1 }
     },
     "codex": {
       "_note": "One config layer per role, selected with --profile. See docs/HOSTS.md for the [agents] table.",

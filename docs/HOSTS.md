@@ -161,8 +161,11 @@ cp -R /tmp/sp/skills/* ~/.easycode-user/skills/
 | 角色 | low | high | max | 说明 |
 |---|---|---|---|---|
 | design | `gpt-6.1-terra` | `gpt-6.1-sol` | `claude-opus-5-5` | 只跑 3–5 轮，取账户内最强；`gpt-6-astra` 不在标准目录里，选不到 |
-| code | `deepseek-flash` | 同左 | 同左 | **必须无 `highVolumeThreshold`**：长会话费率恒定，不会在编码中途涨档 |
-| review | `claude-haiku-5-5` | `gemini-4-argon` | `claude-sonnet-5-5` | 与 code 不同族，且三档都高于 code |
+| code | `ling-3.1-flash` | `deepseek-flash` | `deepseek-flash` | **必须无 `highVolumeThreshold`**：长会话费率恒定，不会在编码中途涨档 |
+| review | `hy4` | `gemini-4-argon` | `claude-sonnet-5-5` | 与 code 不同族，且三档都高于 code |
+
+> low 档的 code 用 `ling-3.1-flash`（0.12，同样无阈值）而不是 `deepseek-flash`：只有 low 允许用模型质量换成本，high/max 仍留 `deepseek-flash`。
+> review.low 由 `claude-haiku-5-5` 换成 `hy4`（1.15 恒定）：前者有 100k 阈值，长会话单价从 0.24 跳到 1.2，评审会话常常一次就越线。
 
 三条硬约束（按顺序校验，缺一条就换型号）：
 
@@ -176,15 +179,15 @@ cp -R /tmp/sp/skills/* ~/.easycode-user/skills/
 "easycode": {
   "models": {
     "design": { "low": "gpt-6.1-terra", "high": "gpt-6.1-sol", "max": "claude-opus-5-5" },
-    "code": "deepseek-flash",
-    "review": { "low": "claude-haiku-5-5", "high": "gemini-4-argon", "max": "claude-sonnet-5-5" }
+    "code": { "low": "ling-3.1-flash", "high": "deepseek-flash", "max": "deepseek-flash" },
+    "review": { "low": "hy4", "high": "gemini-4-argon", "max": "claude-sonnet-5-5" }
   },
   "invocation": {
     "design": "在本宿主 UI 里切到 models.design[gear]",
     "code": "切到 models.code",
     "review": "新开会话 + 切到 models.review[gear]"
   },
-  "estimate": { "low": 26.8, "high": 47.2, "max": 82.1 }
+  "estimate": { "low": 20.6, "high": 47.2, "max": 82.1 }
 }
 ```
 
