@@ -51,6 +51,16 @@ for (const r of new Set(refs)) {
   if (!existsSync(join(templatesDir, r))) fail(`SKILL.md references templates/${r}, which does not exist`);
 }
 
+// 3a. the spec template must ask where an AC came from. A run once invented
+// requirements at G1 (a self-built POI store, a 5000-row cap, tiered number
+// checks) and then built against them.
+{
+  const specTpl = join(templatesDir, 'spec.md');
+  if (existsSync(specTpl) && !readFileSync(specTpl, 'utf8').includes('来源（需求')) {
+    fail('templates/spec.md has no AC 来源 column (every AC must trace to the requirement text or a user decision)');
+  }
+}
+
 // 3b. every plan template carries the §待用户裁决 table. The pipeline kept
 // interrupting the user after the design was finished; this table is the one
 // place a human decision may be raised, asked once at G2.

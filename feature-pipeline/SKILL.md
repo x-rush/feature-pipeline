@@ -61,7 +61,7 @@ If a dispatched skill is not installed, **apply its criteria by hand**, record `
 
 **A role change is a stop, not a hint.** G0->G1 switches to `models.design[gear]`, G2->G3 to `models.code`, G3->G4 to `models.review` in a new session. Name the target id inside that gate's `Next` (do not open a separate round-trip for it), **wait for the user to confirm it is switched, then start** — never begin the stage on whatever model happens to be active. A stage that opens on the wrong model is a deviation: say so and record it. **Next** (G0): `.pipeline.json` with attributes and commands / G1 / **the user switches to `models.design[gear]` before anything else** / opening line "write spec.md from templates/spec.md".
 
-## Three mechanisms used at every gate
+## Mechanisms used at every gate
 
 **1. Exit check by citation, not by checkmark.** Every item must name a location, never claim "done" — no location, no completion; a citation is checkable in 30 seconds, a claim is not:
 
@@ -79,6 +79,8 @@ Exit check
 
 **4. Only three things are the user's to decide.** Ask when a choice is **irreversible, costs money, or changes what was promised outside** — and ask all of them **once, in one batch**, never one per task. What the spec already answers is not a question; what is engineering (table shape, cache, SDK, module layout) the plan decides — pick one and say which. **A reversible local action is not a decision**: do it and report it.
 
+**5. Nothing is settled inline, at any gate.** Changing scope, an AC, user-visible behaviour, data semantics, a dependency, a public interface, deleting something, editing an existing test, or skipping a task is **not yours to decide** — and neither is adding a requirement the user never stated (that goes to 非目标 or `backlog.md`). When one of these appears, stop: **roll back to the stage that owns it** (AC -> G1, design -> G2), raise it there once, and only then continue. Settling it quietly and carrying on is the failure this pipeline exists to prevent.
+
 ## Stage tracking
 Read the disk at the start — never rely on memory:
 
@@ -89,7 +91,7 @@ Read the disk at the start — never rely on memory:
 
 ## G1 — requirements
 
-**Template** `templates/spec.md`. **Criteria**: 3-7 ACs, each with an executable verification command (no "works": cite `commands.test` or a recorded command plus the expected output); non-goals non-empty; open questions cleared or assigned; with `terminology`, a glossary is mandatory (definition + banned synonyms).
+**Template** `templates/spec.md`. **Criteria**: 3-7 ACs, each with an executable verification command (no "works": cite `commands.test` or a recorded command plus the expected output); non-goals non-empty; **every AC traces to the requirement text or a recorded user decision**; open questions cleared or assigned; with `terminology`, a glossary is mandatory (definition + banned synonyms).
 
 **Stop: the user approves the ACs** before G2 — set `spec_approved: true` only on their word; low gear stops here too. **Next**: `spec.md` / G2 (same session) / model unchanged / opening line "draft plan.md from spec.md" (low gear's `merge_g1g2` keeps G1 and G2 in one session; the approval stop still sits between them).
 
